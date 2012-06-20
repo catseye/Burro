@@ -1,4 +1,4 @@
-> -- coding: UTF-8
+-> encoding: UTF-8
 
 The Burro Programming Language
 ==============================
@@ -41,8 +41,8 @@ arbitrary Turing machine to a Burro program, hopefully making uncontroversial
 the idea that Burro qualifies as universal.
 
 For further background information on the Burro project, you may also wish
-to read the [Burro 1.0 article](burro-1.0.html), with the understanding that
-the language description given there is obsolete.
+to read the [Burro 1.0 article](../doc/burro-1.0.html), with the understanding
+that the language description given there is obsolete.
 
 
 Changes from Burro 1.0
@@ -111,13 +111,13 @@ symbols which are not Burro symbols are simply ignored.
 >     show GoRight = ">"
 >     show (Test a b) = "(" ++ (show a) ++ "/" ++ (show b) ++ ")"
 >     show (Seq a b) = (show a) ++ (show b)
->
+> 
 > parse string =
 >         let
 >             (rest, acc) = parseProgram string Null
 >         in
 >             trim acc
->
+> 
 > parseProgram [] acc =
 >     ([], acc)
 > parseProgram ('e':rest) acc =
@@ -145,7 +145,7 @@ symbols which are not Burro symbols are simply ignored.
 >     (rest, acc)
 > parseProgram (_:rest) acc =
 >     parseProgram rest acc
->
+> 
 > trim (Seq Null a) = trim a
 > trim (Seq a Null) = trim a
 > trim (Seq a b) = Seq (trim a) (trim b)
@@ -202,7 +202,7 @@ the tape head, in the same order as it appears on the tape.
 
 > data Tape = Tape [Integer] [Integer]
 >     deriving (Read)
->
+> 
 > instance Show Tape where
 >     show t@(Tape l r) =
 >         let
@@ -227,7 +227,7 @@ must be in the same location) for two tapes to be considered equal.
 > ensurecell x  = x
 > 
 > strip (Tape l r) = Tape (ensurecell (stripzeroes l)) (stripzeroes r)
->
+> 
 > tapeeq :: Tape -> Tape -> Bool
 > tapeeq t1 t2 =
 >     let
@@ -235,7 +235,7 @@ must be in the same location) for two tapes to be considered equal.
 >         (Tape t2l t2r) = strip t2
 >     in
 >         (t1l == t2l) && (t1r == t2r)
->
+> 
 > instance Eq Tape where
 >     t1 == t2 = tapeeq t1 t2
 
@@ -275,7 +275,7 @@ semantics.
 
 > data State = State Tape Tape Bool
 >     deriving (Show, Read, Eq)
->
+> 
 > newstate = State (tape [0]) (tape [0]) True
 
 
