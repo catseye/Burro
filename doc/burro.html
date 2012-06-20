@@ -1,711 +1,685 @@
-<html><head><title>The Burro programming language</title></head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>The Burro Programming Language, v2.0</title>
+<link rel="stylesheet" type="text/css" href="markdown-lhs.css" />
+</head>
 <body>
+<h1>The Burro Programming Language</h1>
 
-<h1>Burro</h1>
+<p>Version 2.0
+June 2010, Chris Pressey, Cat's Eye Technologies</p>
 
-<p>October 2007, Chris Pressey, Cat's Eye Technologies.</p>
+<h2>Introduction</h2>
 
-<h2>1. Introduction</h2>
+<p>Burro is a programming language whose programs form an algebraic group under
+the operation of concatenation and over the equivalence relation of "computes
+the same function."  This means that, for every Burro program, we can
+construct a corresponding antiprogram that, when appended onto the first
+program, results in a "no-op" program (a program with no effect &mdash; the
+identity function.)</p>
 
-<p><em>Burro</em> is a Brainfuck-like programming language whose programs form an
-algebraic group under concatenation.</p>
+<p>(In fact, for every set of Burro programs that compute the same function,
+there is a corresponding set of antiprograms, any of which can "cancel out"
+any program in the first set.  From our proof that Burro programs form a
+group, we obtain a constructive algorithm which, for any given program, will
+derive only one corresponding antiprogram, a kind of syntactic inverse.)</p>
 
-<p>(At least, that is how I originally would have described it.  But that description
-turns out to be not entirely precise, because the technical meanings of "group" and
-"program" come into conflict.  A more precise statement would be: "Burro is
-a semi-formal programming language, the set of whose program texts, paired with the operation
-of concatenation, forms an algebraic group over a semantic equivalence relation."
-But the first version is close enough for jazz, and rolls off the tongue more easily...)</p>
+<p>This is a kind of reversible computing, but Burro differs from most reversible
+languages in that it is not the execution trace that is being "undone", but
+the program itself that is being annihilated.</p>
 
-<p>Anyway, what does it mean?  It means that, among other things, every Burro program has
-an <em>antiprogram</em> &mdash; a series of instructions that can be appended to it
-to annihilate its behavior.  The resulting catenated program has the
-same semantics as no program at all &mdash; a "no-op," or a zero-length program.</p>
+<p>This document describes version 2.0 of the Burro language, a reformulation
+which addresses several issues with Burro 1.0.  An update to the language was
+desired by the author after it was pointed out by Alex Smith that the set of
+Burro version 1.0 programs do not, in fact, form a proper group (the inverse
+of (/) is {}, but no inverse of {} is defined; also, the implementations
+(at least) did not support moving the tape head left past the "start" of the
+tape, so &lt;> was not a well-defined program.)</p>
 
-<p>Why is this at all remarkable?  Well, take the Brainfuck program fragment <code>[-]+[]</code>.
-What could you append to it to it to make it into a "no-op" program?
-Evidently <em>nothing</em>, because once the interpreter enters an infinite loop, it's not
-going to care what instructions you've put after the loop.  And a program that loops forever
-isn't the same as one that does nothing at all.</p>
+<p>Additionally in this document, we construct a Burro 2.0 program equivalent to
+a certain Turing machine.  While this Turing machine is not universal, the
+translation method we use demonstrates how it would be possible to map an
+arbitrary Turing machine to a Burro program, hopefully making uncontroversial
+the idea that Burro qualifies as universal.</p>
 
-<p>So not all Brainfuck programs have antiprograms.  Despite that, Brainfuck does embody a lot of
-symmetry. Group theory, too, is a branch of
-mathematics particularly suited to the study of symmetry.  And as you might imagine,
-there is a distinct relation between symmetrical programming languages and reversible
-programming (even though it may not be immediatly clear exactly what that relationship is.) 
-These are some of the factors that encouraged me to design Burro.</p>
+<p>For further background information on the Burro project, you may also wish
+to read the <a href="burro-1.0.html">Burro 1.0 article</a>, with the understanding that
+the language description given there is obsolete.</p>
 
-<h2>2. Background</h2>
+<h2>Changes from Burro 1.0</h2>
 
-<p>Before explaining Burro, a short look of group theory and of the theory of
-computation would probably be helpful.</p>
+<p>The {} construct does not appear in Burro 2.0.  Instead, the (/) construct
+serves as its own inverse.  The tree-like structure of decision continuations
+is not present in Burro 2.0 either.  Instead, decision information is kept on
+a second tape, called the "stack tape".</p>
 
-<h3>Group Theory</h3>
+<p>Henceforth in this document, the term Burro refers to Burro 2.0.</p>
 
-<p>Recall (or go look up in an abstract algebra textbook) that a <em>group</em> is
-a pair of a set <var>S</var> and a binary operation
-&middot; : <var>S</var> &times; <var>S</var> &rarr; <var>S</var>
-that obeys the following three axioms:</p>
+<h2>About this Document</h2>
+
+<p>This document is a reference implementation of Burro in literate Haskell,
+using Markdown syntax for the textual prose portions (although the version
+you are reading may have been converted to another format, such as HTML,
+for presentation.)  As such, this document serves as an "executable
+semantics", both defining the language and providing a ready tool.</p>
+
+<pre><code> module Main where
+ import System
+</code></pre>
+
+<h2>Inductive Definition of a Burro Program</h2>
+
+<p>The symbol e is a Burro program. <br />
+The symbol ! is a Burro program. <br />
+The symbol + is a Burro program. <br />
+The symbol - is a Burro program. <br />
+The symbol &lt; is a Burro program. <br />
+The symbol > is a Burro program. <br />
+If a and b are Burro programs, then (a/b) is a Burro program. <br />
+If a and b are Burro programs, then ab is a Burro program. <br />
+Nothing else is a Burro program.  </p>
+
+<pre><code> data Burro = Null
+            | ToggleHalt
+            | Inc
+            | Dec
+            | GoLeft
+            | GoRight
+            | Test Burro Burro
+            | Seq Burro Burro
+     deriving (Read, Eq)
+</code></pre>
+
+<h2>Representation of Burro Programs</h2>
+
+<p>For a concrete representation, the symbols in the inductive definition
+given above can be taken to be a subset of a character set; for the
+purposes of this semantics, we will use the ASCII character set.  Parsing
+a given string of symbols into a Burro program is straightforward; all
+symbols which are not Burro symbols are simply ignored.</p>
+
+<pre><code> instance Show Burro where
+     show Null = "e"
+     show ToggleHalt = "!"
+     show Inc = "+"
+     show Dec = "-"
+     show GoLeft = "&lt;"
+     show GoRight = "&gt;"
+     show (Test a b) = "(" ++ (show a) ++ "/" ++ (show b) ++ ")"
+     show (Seq a b) = (show a) ++ (show b)
+
+ parse string =
+         let
+             (rest, acc) = parseProgram string Null
+         in
+             trim acc
+
+ parseProgram [] acc =
+     ([], acc)
+ parseProgram ('e':rest) acc =
+     parseProgram rest (Seq acc Null)
+ parseProgram ('+':rest) acc =
+     parseProgram rest (Seq acc Inc)
+ parseProgram ('-':rest) acc =
+     parseProgram rest (Seq acc Dec)
+ parseProgram ('&lt;':rest) acc =
+     parseProgram rest (Seq acc GoLeft)
+ parseProgram ('&gt;':rest) acc =
+     parseProgram rest (Seq acc GoRight)
+ parseProgram ('!':rest) acc =
+     parseProgram rest (Seq acc ToggleHalt)
+ parseProgram ('(':rest) acc =
+     let
+         (rest',  thenprog) = parseProgram rest Null
+         (rest'', elseprog) = parseProgram rest' Null
+         test = Test thenprog elseprog
+     in
+         parseProgram rest'' (Seq acc test)
+ parseProgram ('/':rest) acc =
+     (rest, acc)
+ parseProgram (')':rest) acc =
+     (rest, acc)
+ parseProgram (_:rest) acc =
+     parseProgram rest acc
+
+ trim (Seq Null a) = trim a
+ trim (Seq a Null) = trim a
+ trim (Seq a b) = Seq (trim a) (trim b)
+ trim (Test a b) = Test (trim a) (trim b)
+ trim x = x
+</code></pre>
+
+<h2>Group Properties of Burro Programs</h2>
+
+<p>We assert these first, and when we describe the program semantics we will
+show that the semantics do not violate them.</p>
+
+<p>The inverse of e is e: ee = e <br />
+The inverse of ! is !: !! = e <br />
+The inverse of + is -: +- = e <br />
+The inverse of - is +: -+ = e <br />
+The inverse of &lt; is >: &lt;> = e <br />
+The inverse of > is &lt;: >&lt; = e <br />
+If aa' = e and bb' = e, (a/b)(b'/a') = e. <br />
+If aa' = e and bb' = e, abb'a' = e.  </p>
+
+<pre><code> inverse Null = Null
+ inverse ToggleHalt = ToggleHalt
+ inverse Inc = Dec
+ inverse Dec = Inc
+ inverse GoLeft = GoRight
+ inverse GoRight = GoLeft
+ inverse (Test a b) = Test (inverse b) (inverse a)
+ inverse (Seq a b) = Seq (inverse b) (inverse a)
+</code></pre>
+
+<p>For every Burro program x, annihilationOf x is always equivalent
+computationally to e.</p>
+
+<pre><code> annihilationOf x = Seq x (inverse x)
+</code></pre>
+
+<h2>State Model for Burro Programs</h2>
+
+<p>Central to the state of a Burro program is an object called a tape.
+A tape consists of a sequence of cells in a one-dimensional array,
+unbounded in both directions.  Each cell contains an integer of unbounded
+extent, both positive and negative.  The initial value of each cell is
+zero.  One of the cells of the tape is distinguished as the "current cell";
+this is the cell that we think of as having the "tape head" hovering over it
+at the moment.</p>
+
+<p>In this semantics, we represent a tape as two lists, which we treat as
+stacks.  The first list contains the cell under the tape head, and
+everything to the left of the tape head (in the reverse order from how it
+appears on the tape.)  The second list contains everything to the right of
+the tape head, in the same order as it appears on the tape.</p>
+
+<pre><code> data Tape = Tape [Integer] [Integer]
+     deriving (Read)
+
+ instance Show Tape where
+     show t@(Tape l r) =
+         let
+             (Tape l' r') = strip t
+         in
+             show (reverse l') ++ "&lt;" ++ (show r')
+</code></pre>
+
+<p>When comparing two tapes for equality, we must disregard any zero cells
+farther to the left/right than the outermost non-zero cells.  Specifically,
+we strip leading/trailing zeroes from tapes before comparison.  We don't
+strip out a zero that a tape head is currently over, however.</p>
+
+<p>Also, the current cell must be the same for both tapes (that is, tape heads
+must be in the same location) for two tapes to be considered equal.</p>
+
+<pre><code> stripzeroes list = (reverse (sz (reverse list)))
+     where sz []       = []
+           sz (0:rest) = sz rest
+           sz x        = x
+
+ ensurecell [] = [0]
+ ensurecell x  = x
+
+ strip (Tape l r) = Tape (ensurecell (stripzeroes l)) (stripzeroes r)
+
+ tapeeq :: Tape -&gt; Tape -&gt; Bool
+ tapeeq t1 t2 =
+     let
+         (Tape t1l t1r) = strip t1
+         (Tape t2l t2r) = strip t2
+     in
+         (t1l == t2l) &amp;&amp; (t1r == t2r)
+
+ instance Eq Tape where
+     t1 == t2 = tapeeq t1 t2
+</code></pre>
+
+<p>A convenience function for creating an inital tape is also provided.</p>
+
+<pre><code> tape :: [Integer] -&gt; Tape
+ tape x = Tape [head x] (tail x)
+</code></pre>
+
+<p>We now define some operations on tapes that we will use in the semantics.
+First, operations on tapes that alter or access the cell under the tape head.</p>
+
+<pre><code> inc (Tape (cell:left) right) = Tape (cell + 1 : left) right
+ dec (Tape (cell:left) right) = Tape (cell - 1 : left) right
+ get (Tape (cell:left) right) = cell
+ set (Tape (_:left) right) value = Tape (value : left) right
+</code></pre>
+
+<p>Next, operations on tapes that move the tape head.</p>
+
+<pre><code> left (Tape (cell:[]) right) = Tape [0] (cell:right)
+ left (Tape (cell:left) right) = Tape left (cell:right)
+ right (Tape left []) = Tape (0:left) []
+ right (Tape left (cell:right)) = Tape (cell:left) right
+</code></pre>
+
+<p>Finally, an operation on two tapes that swaps the current cell between
+them.</p>
+
+<pre><code> swap t1 t2 = (set t1 (get t2), set t2 (get t1))
+</code></pre>
+
+<p>A program state consists of:</p>
 
 <ul>
-
-<li>For any three elements <var>a</var>, <var>b</var>, and <var>c</var> of
-the set <var>S</var>, (<var>a</var> &middot; <var>b</var>) &middot; <var>c</var> =
-<var>a</var> &middot; (<var>b</var> &middot; <var>c</var>).  In other words,
-the operation is "associative."  Parentheses don't matter, and we generally leave them out.</li>
-
-<li>There exists some element of <var>S</var>, which we call <b>e</b>, such that
-<var>a</var> &middot; <b>e</b> = <b>e</b> &middot; <var>a</var> = <var>a</var>
-for every element <var>a</var> of <var>S</var>.  Think of
-<b>e</b> as a "neutral" element that just doesn't contribute anything.</li>
-
-<li>For every element <var>a</var> of <var>S</var> there is an element
-<var>a'</var> of <var>S</var> such that <var>a</var> &middot; <var>a'</var> = <b>e</b>.
-That is, for any element, you can find some element that "annihilates" it.</li>
-
+<li>A "data tape";</li>
+<li>A "stack tape"; and</li>
+<li>A flag called the "halt flag", which may be 0 or 1.</li>
 </ul>
 
-<p>There are lots of examples of groups &mdash; the integers under the operation of
-addition, for example, where <b>e</b> is 0, and the annihilator for any integer
-is simply its negative (because <var>x</var> + (-<var>x</var>) always equals 0.)</p>
-
-<p>There are also lots of things you can prove are true about any group
-(that is, about groups in general.) For instance, that <b>e</b> is unique: if
-<var>a</var> &middot; <var>x</var> = <var>a</var> and
-<var>a</var> &middot; <var>y</var> = <var>a</var> then
-<var>x</var> = <var>y</var> = <b>e</b>.  (This particular property will
-become relevant very soon, so keep it in mind as you read the next section.)</p>
-
-<p>The set on which a group is based can have any number of elements.  Research
-and literature in group theory often concentrates on finite groups, because these
-are in some ways more interesting, and they are useful in error-correcting
-codes and other applications.  However, the set of Burro programs is countably
-infinite, so we will be dealing with infinite groups here.</p>
-
-<h3>Theory of Computation</h3>
-
-<p>I don't need to call on a lot of theory of computation here except to point
-out one fact: for any program, there are an infinite number of equivalent programs.
-There are formal proofs of this, but they can be messy, and it's something
-that should be obvious to most programmers.  Probably the simplest example, in Brainfuck,
-is that <code>+-</code>, <code>++--</code>, <code>+++---</code>, <code>++++----</code>,
-etc., all have the same effect.</p>
-
-<p>To be specific, by "program" here I mean "program text" in a
-particular language; if we're talking about "abstract programs" in no particular
-language, then you could well say that there is only and exactly one program that
-does any one thing, it's just that there are an infinite number of concrete
-representations of it.</p>
-
-<p>This distinction becomes important with respect to treating programs
-as elements of a group, like we're doing in Burro.  Some program will
-be the neutral element <b>e</b>.  But either <em>many</em> programs will
-be equivalent to this program &mdash; in which case <b>e</b> is not unique, contrary to
-what group theory tells us &mdash; or we are talking about abstract programs
-independent of any programming language, in which case our goal of defining a particular
-language called "Burro" for this purpose seems a bit futile.</p>
-
-<p>There are a couple of ways this could be resolved.  We could foray into
-domain theory, and try to impose a group structure on the semantics of programs
-irrespective of the language they are in.  Or we could venture into representation
-theory, and see if the program texts can act as generators of the group elements.
-Both of these approaches could be interesting, but I chose an approach that I
-found to be less of a distraction, and possibly more intuitive, at the cost of
-introducing a slight variation on the notion of a group.</p>
-
-<h3>Group Theory, revisited</h3>
-
-<p>To this end, let's examine the idea of a <em>group over an equivalence relation</em>.
-All this is, really, is being specific about what constitutes "equals" in those
-group axioms I listed earlier.  In mathematics there is a well-established notion of
-an <em>equivalence relation</em> &mdash; a relationship between elements
-which paritions a set into
-disjoint equivalence classes, where every element in a class is considered
-equivalent to every other element in that same class (and inequivalent to any
-element in any other class.)</p>
-
-<p>We can easily define an equivalence relation on programs (that is,
-program texts.)  We simply say that two programs are
-equivalent if they have the same semantics: they map the same inputs to the
-same outputs, they compute the same function, they "do the same thing" as
-far as an external observer can tell, assuming he or she is unconcerned with
-performance issues. As you can imagine, this relation will be very useful for
-our purpose.</p>
-
-<p>We can also reformulate the group axioms using an equivalence relation.
-At the very least, I can't see why it should be invalid to do so.  (Indeed, this seems to
-be the general idea behind using "quotients" in abstract algebra.  In our case, we
-have a set of program texts and a "semantic" equivalence relation "are equivalent
-programs", and the quotient set is the set of all computable functions
-regardless of their concrete representation.)</p>
-
-<p>So let's go ahead and take that liberty.  The resulting algebraic structure
-should be quite similar to what we had before,
-but with the equivalence classes becoming the real "members" of the group,
-and with each class containing many individual elements which are treated
-interchangably with respect to the group axioms.</p>
-
-<p>I'll summarize the modified definition here.  A <em>group over an equivalence relation</em>
-is a triple &lang;<var>S</var>,&middot;,&equiv;&rang; where:</p>
-<ul>
-<li><var>S</var> is a set</li>
-<li>&middot; : <var>S</var> &times; <var>S</var> &rarr; <var>S</var> is a binary operation over <var>S</var></li>
-<li>&equiv; is a reflexive, transitive, and symmetrical binary relation over <var>S</var></li>
-</ul>
-<p>where the following axioms are also satisfied:</p>
-<ul>
-<li>&forall; <var>a</var>, <var>b</var>, <var>c</var> &isin; <var>S</var>: (<var>a</var> &middot; <var>b</var>) &middot; <var>c</var> &equiv;
-<var>a</var> &middot; (<var>b</var> &middot; <var>c</var>)</li>
-<li>&exist; <b>e</b> &isin; <var>S</var>: &forall; <var>a</var> &isin; <var>S</var>: <var>a</var> &middot; <b>e</b> &equiv; <b>e</b> &middot; <var>a</var> &equiv; <var>a</var></li>
-<li>&forall; <var>a</var> &isin; <var>S</var>: &exist; <var>a'</var> &isin; <var>S</var>: <var>a</var> &middot; <var>a'</var> &equiv; <b>e</b></li>
-</ul>
-
-<p>Every theorem that applies to groups should be easy to modify to be applicable
-to a group over an equivalence relation: just replace = with &equiv;.  So what
-we have, for example, is that while any given <b>e</b> itself might not be unique, the
-equivalence class <b>E</b> &sube; <var>S</var> that contains it is:
-<b>E</b> is the only equivalence class that contains
-elements like <b>e</b> and, for the purposes of the group, all of these elements are
-interchangeable.</p>
-
-<h2>3. Syntax and Semantics</h2>
-
-<h3>Five-instruction Foundation</h3>
-
-<p>Burro is intended to be Brainfuck-like, so we could start by examining which
-parts of Brainfuck are already suitable for Burro and which parts will have to
-be modified or rejected.</p>
-
-<p>First, note that Brainfuck is traditionally very lenient about what
-constitutes a "no-op" instruction.  Just about any symbol that isn't explicitly
-mentioned in the instruction set is treated as a no-op (and this behaviour turns
-out to be useful for inserting comments in programs.)  In Burro, however, we'll
-strive for better clarity by defining an explicit "no-op" instruction.  For
-consistency with the group theory side of things, we'll call it <code>e</code>.
-(Of course, we won't forget that <code>e</code> lives in an equivalence class
-with other things like <code>+-</code> and the zero-length program, and all
-of these things are semantically interchangeable.  But <code>e</code> gives
-us a nice, single-symbol, canonical program form when we want to talk about it.)</p>
-
-<p>Now let's consider the basic Brainfuck instructions <code>+</code>, <code>-</code>,
-<code>&lt;</code>, and <code>&gt;</code>.  They have a nice, symmetrical
-organization that is ideally suited to group structure, so we will adopt them
-in our putative Burro design.</p>
-
-<p>On the other hand, the instructions <code>.</code> and <code>,</code> will require
-devising some kind of annihilator for interactive input and output.  This seems
-difficult at least, and not really necessary if we're willing to forego writing
-"Hunt the Wumpus" in Burro, so we'll leave them out for now.  The only input for a
-Burro program is, instead, the initial state of the tape, and the only output is the
-final state.</p>
-
-<p>In addition, <code>[</code> and <code>]</code> will cause problems, because
-as we saw in the introduction, <code>[-]+[]</code> is an infinite loop, and it's
-not clear what we could use to annihilate it.  We'll defer this question for later
-and for the meantime leave these instructions out, too.</p>
-
-<p>What we're left in our "Burro-in-progress" is essentially a very weak subset of
-Brainfuck, with only the five instructions <code>+-&gt;&lt;e</code>.  But this is
-a starting point that we can use to see if we're on the right track.  Do the
-programs formed from strings of these instructions form a group under concatenation
-over the semantic equivalence relation?  i.e.,  Does every Burro program so far
-have an inverse?</p>
-
-<p>Let's see.  For every <i>single-instruction</i> Burro
-program, we can evidently find another Burro instruction that, when appended to
-it, "cancels it out" and makes a program with the same semantics as <code>e</code>:</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
-<tr><td align="center"><code>+</code></td><td align="center"><code>-</code></td>
-    <td align="center"><code>+-</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>-</code></td><td align="center"><code>+</code></td>
-    <td align="center"><code>-+</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>&gt;</code></td><td align="center"><code>&lt;</code></td>
-    <td align="center"><code>&gt;&lt;</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>&lt;</code></td><td align="center"><code>&gt;</code></td>
-    <td align="center"><code>&lt;&gt;</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>e</code></td><td align="center"><code>e</code></td>
-    <td align="center"><code>ee</code></td><td align="center"><code>e</code></td></tr>
-</table>
-
-<p>Note that we once again should be more explicit about our requirements than
-Brainfuck.  We need to have a tape which is infinite in both directions, or else
-<code>&lt;</code> wouldn't always be the inverse of <code>&gt;</code> (because sometimes
-it'd fail in some way like falling off the edge of the tape.)  And, so that we don't have
-to worry about overflow and all that rot,
-let's say cells can take on any unbounded negative or positive integer value, too.</p>
-
-<p>But does this hold for <em>any</em> Burro program?  We can use structural
-induction to determine this.
-Can we find inverses for every Burro program, concatenated with a given
-instruction?  (In the following table,
-<i>b</i> indicates any Burro program, and <i>b'</i> its inverse.
-Also note that <i>bb'</i> is, by definition, <code>e</code>.)</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
-<tr><td align="center"><code><i>b</i>+</code></td><td align="center"><code>-<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>+-<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>-</code></td><td align="center"><code>+<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>-+<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>&gt;</code></td><td align="center"><code>&lt;<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>&gt;&lt;<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>&lt;</code></td><td align="center"><code>&gt;<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>&lt;&gt;<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>e</code> &equiv; <code><i>b</i></code></td><td align="center"><code>e<i>b'</i></code> &equiv; <code><i>b'</i>e</code> &equiv; <code><i>b'</i></code></td>
-    <td align="center"><code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-</table>
-
-<p>Looks good.  However, this isn't an abelian group, and concatenation is definately not
-commutative.  So, to be complete, we need a table going in the other direction, too: concatenation of a
-given instruction with any Burro program.</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
-<tr><td align="center"><code>+<i>b</i></code></td><td align="center"><code><i>b'</i>-</code></td>
-    <td align="center"><code>+<i>bb'</i>-</code> &equiv; <code>+e-</code> &equiv; <code>+-</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>-<i>b</i></code></td><td align="center"><code><i>b'</i>+</code></td>
-    <td align="center"><code>-<i>bb'</i>+</code> &equiv; <code>-e+</code> &equiv; <code>-+</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>&gt;<i>b</i></code></td><td align="center"><code><i>b'</i>&lt;</code></td>
-    <td align="center"><code>&gt;<i>bb'</i>&lt;</code> &equiv; <code>&gt;e&lt; &equiv; <code>&gt;&lt;</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>&lt;<i>b</i></code></td><td align="center"><code><i>b'</i>&gt;</code></td>
-    <td align="center"><code>&lt;<i>bb'</i>&gt;</code> &equiv; <code>&lt;e&gt; &equiv; <code>&lt;&gt;</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>e<i>b</i></code> &equiv; <code><i>b</i></code></td><td align="center"><code><i>b'</i>e</code> &equiv; <code>e<i>b'</i></code> &equiv; <code><i>b'</i></code></td>
-   <td align="center"><code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-</table>
-
-<p>So far, so good, I'd say.  Now we can address to the problem of how to
-restrengthen the language so that it remains as powerful as Brainfuck.</p>
-
-<h3>Loops</h3>
-
-<p>Obviously, in order for Burro to be as capable as Brainfuck,
-we would like to see some kind of looping mechanism in it. But, as we've
-seen, Brainfuck's is insufficient for our purposes, because it allows for
-the construction of infinite loops that we can't invert by concatenation.</p>
-
-<p>We could insist that all loops be finite, but that would make
-Burro less powerful than Brainfuck &mdash; it would only be capable of expressing
-the primitive recursive functions.  The real challenge is in having Burro be Turing-complete,
-like Brainfuck.</p>
-
-<p>This situation looks dire, but there turns out to be a way.  What we
-do is borrow the trick used in languages like L00P and Version (and probably
-many others.)  We put a single, implicit loop around the whole program.
-(There is a classic formal proof that this is sufficient &mdash; the interested
-reader is referred to the paper "Kleene algebra with tests"<sup><a href="#1">1</a></sup>,
-which gives a brief history, references, and its own proof.)</p>
-
-<p>This single implicit loop will be conditional on a special flag, which
-we'll call the "halt flag", and we'll stipulate is initially set.
-If this flag is still set when the end of the program is reached, the program halts.
-But if it is unset when the end of the program is reached, the flag is reset
-and the program repeats from the beginning.  (Note that although the halt flag
-is reset, all other program state (i.e. the tape) is left alone.)</p>
-
-<p>To manipulate this flag, we introduce a new instruction:</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Semantics</th></tr>
-<tr><td align="center"><code>!</code></td><td>Toggle halt flag</td></tr>
-</table>
-
-<p>Then we check that adding this instruction to Burro's instruction set
-doesn't change the fact that Burro programs form a group:</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
-<tr><td align="center"><code>!</code></td><td align="center"><code>!</code></td>
-    <td align="center"><code>!!</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>!<i>b</i></code></td><td align="center"><code><i>b'</i>!</code></td>
-    <td align="center"><code>!<i>bb'</i>!</code> &equiv; <code>!e!</code> &equiv; <code>!!</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>!</code></td><td align="center"><code>!<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>!!<i>b'</i></code> &equiv; <code><i>beb'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-</table>
-
-<p>Seems so.  Now we can write Burro programs that halt, and Burro programs that loop
-forever.  What we need next is for the program to be able to decide this behaviour
-for itself.</p>
-
-<h3>Conditionals</h3>
-
-<p>OK, this is the ugly part.</p>
-
-<p>Let's add a simple control structure to Burro.  Since we already have repetition, this
-will only be for conditional execution.  To avoid confusion with Brainfuck, we'll avoid <code>[]</code>
-entirely; instead, we'll use <code>()</code>
-to indicate "execute the enclosed code (once) if and only if the current cell is non-zero".</p>
-
-<p>Actually, let's make it a bit fancier, and allow an "else" clause to be inserted in it,
-like so: <code>(/)</code> where the code before the <code>/</code> is executed iff the cell
-is non-zero, and the code after the <code>/</code> is executed iff it is zero.</p>
-
-<p>(The reasons for this design choice are subtle.  They come down to the fact that
-in order to find an inverse of a conditional, we need to invert the sense of the test.
-In a higher-level language, we could use a Boolean NOT operation for this.  However, in
-Brainfuck, writing a NOT requires a loop, and thus a conditional.  Then we're stuck
-with deciding how to invert the sense of <em>that</em> conditional, and so forth.  By
-providing NOT-like behaviour as a built-in courtesy of <code>/</code>, we dodge the
-problem entirely.  If you like, you can think of it as meeting the aesthetic demands of
-a symmetrical language: the conditional structures are symmetrical too.)</p>
-
-<p>A significant difference here with Brainfuck is that, while Brainfuck is a bit
-lacksidaisical about matching up <code>[</code>'s with <code>]</code>'s, we explicitly
-<em>disallow</em> parentheses that do not nest correctly in Burro.  A Burro program with mismatched
-parentheses is an ill-formed Burro program, and thus not really a Burro program at all.
-We turn up our nose at it; we aren't even interested in whether we can find an
-inverse of it, because we don't acknowledge it.  This applies to the placement of
-<code>/</code> outside of parentheses, or the absence of <code>/</code> in parentheses,
-as well.</p>
-
-<p>(The reasons for this design choice are also somewhat subtle.  I originally wanted
-to deal with this by saying that <code>(</code>, <code>/</code>, and <code>)</code>
-could come in any order, even a nonsensical one, and still make a valid Burro program,
-only with the semantics of "no-op" or "loop forever" or something equally representative of
-"broken."  You see this quite often in toy formal languages, and the resulting lack of
-syntax would seem to allow the set of Burro instructions to be a "free generator" of
-the group of Burro programs, which sounds like it might have very nice
-abstract-algebraical properties.
-The problem is that it potentially interferes with the whole "finding an
-antiprogram" thing.  If a Burro program with mismatched parentheses has the
-semantics of "no-op", then every Burro program has a trivial annihilator: just
-tack on an unmatching parenthesis.  Similarly, if malformed programs are
-considered to loop forever, how do you invert them?  So, for these reasons,
-Burro has some small amount of syntax &mdash; a bit more than Brainfuck is usually
-considered to have, but not much.)</p>
-
-<p>Now, it turns out we will have to do a fair bit of work on <code>()</code> in order
-to make it so that we can always find a bit of code that is the inverse of some other
-bit of code that includes <code>()</code>.</p>
-
-<p>We can't just make it a "plain old if", because by the time we've finished executing an "if",
-we don't know which branch was executed &mdash; so we have no idea what the "right"
-inverse of it would be.  For example,</p>
-
-<ul><code>(-/e)</code></ul>
-
-<p>After this has finished executing, the current cell could contain 0 - but is that because it
-was already 0 before the <code>(</code> was encountered, and nothing happened to it
-inside the "if"... or is it because it was 1 before
-the <code>(</code> was encountered, and decremented to 0 by the <code>-</code>
-instruction inside the "if"?
-It could be either, and we don't know &mdash; so we can't find an inverse.</p>
-
-<p>We remedy this in a somewhat disappointingly uninteresting way: we make a copy of
-the value being tested and squirrel it away for future reference, so that pending code
-can look at it and tell what decision was made, and in so doing, act appropriately to
-invert it.</p>
-
-<p>This information that we squirrel away is, I would say, a kind of <em>continuation</em>.
-It's not a full-bodied continuation, as the term continuation is often used, in the
-sense of "function representing the entire remainder of the computation."
-But, it's a bit of context that is retained during execution that is intended to affect
-some future control flow decision &mdash; and that's the basic purpose of a continuation.
-So, I will call it a continuation, although it is perhaps a diminished sort of continuation.
-(In this sense, the machine stack where arguments and
-return addresses are stored in a language like C is also a kind of continuation.)</p>
-
-<p>These continuations that we maintain, these pieces of information that tell us how
-to undo things in the future, do need to have an orderly relationship with each other.
-Specifically, we need to remember to undo the more recent conditionals first.  So, we
-retain the continuations in a FIFO discipline, like a stack.  Whenever a <code>(</code> is
-executed, we "push" a continuation into storage, and when we need to invert the effect
-of a previous conditional, we "pop" a continuation from storage.</p>
-
-<p>To actually accomplish this latter action we need to define the control structure
-for undoing conditional tests.  We introduce the construct
-<code>{\}</code>, which works just like <code>(/)</code>, except that the value that it tests
-doesn't come from the tape &mdash; instead, it comes from the continuation.  We establish similar
-syntactic rules about matching every <code>{</code> with a <code>}</code> and an
-intervening <code>\</code>, in addition to a rule that says every <code>{\}</code>
-must be preceded by a <code>(/)</code>.</p>
-
-<p>With this, we're very close to having an inverse for conditionals.  Consider:</p>
-
-<ul><code>(-/e){+\e}</code></ul>
-
-<p>If the current cell contains 0 after <code>(-/e)</code>, the continuation will contain either
-a 1 or a 0 (the original contents of the cell.)  If the continuation contains a 0, the "else" part of
-<code>{+\e}</code> will be executed &mdash; i.e. nothing will happen.  On the other hand, if the
-continuation contains a 1, the "then" part of <code>{+\e}</code> will be executed.
-Either way, the tape is correctly restored to its original (pre-<code>(-/e)</code>) state.</p>
-
-<p>There are still a few details to clean up, though.
-Specifically, we need to address nesting.  What if we're given</p>
-
-<ul><code>(&gt;(&lt;+/e)/e)</code></ul>
-
-<p>How do we form an inverse of this?  How would the following work?</p>
-
-<ul><code>(&gt;(&lt;+/e)/e){{-&gt;\e}&lt;\e}</code></ul>
-
-<p>The problem with this, if we collect continuations using only a naive stack arrangement,
-is that we don't remember how many times a <code>(</code> was encountered before a
-matching <code>)</code>.  The retention of continuations is still FIFO, but we need
-more control over the relationships between the continuations.</p>
-
-<p>The nested structure of the <code>(/)</code>'s suggests a nested structure
-for collecting continuations.  
-Whenever we encounter a <code>(</code> and we "push" a continuation into storage,
-that continuation becomes the root for a new collection of continuations
-(those that occur <em>inside</em> the present conditional, up to the matching
-<code>)</code>.)  Since each continuation is both part of some FIFO series of
-continuations, and has the capacity to act as the root of it's <em>own</em> FIFO series
-of continuations, the continuations are arranged in a structure that is
-more a binary tree than a stack.</p>
-
-<p>This is perhaps a little complicated, so I'll summarize it in this table.
-Since this is a fairly operational description, I'll use the term "tree node"
-instead of continuation to help you visualize it.  Keep in mind that at any
-given time there is a "current continuation" and thus a current tree node.</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Semantics</th></tr>
-<tr><td align="center"><code>(</code></td><td>
-<ul>
-<li>Create a new tree node with the contents of the current cell</li>
-<li>Add that new node as a child of the current node</li>
-<li>Make that new node the new current node</li>
-<li>If the current cell is zero, skip one instruction past the matching <code>/</code></li>
-</ul>
-</td></tr>
-<tr><td align="center"><code>/</code></td><td>
-<ul>
-<li>Skip to the matching <code>)</code></li>
-</ul>
-</td></tr>
-<tr><td align="center"><code>)</code></td><td>
-<ul>
-<li>Make the parent of the current node the new current node</li>
-</ul>
-</td></tr>
-<tr><td align="center"><code>{</code></td><td>
-<ul>
-<li>Make the most recently added child of the current node the new current node</li>
-<li>If the value of the current node is zero, skip one instruction past the matching <code>\</code></li>
-</ul>
-</td></tr>
-<tr><td align="center"><code>\</code></td><td>
-<ul>
-<li>Skip to the matching <code>}</code></li>
-</ul>
-</td></tr>
-<tr><td align="center"><code>}</code></td><td>
-<ul>
-<li>Make the parent of the current node the new current node</li>
-<li>Remove the old current node and all of its children</li>
-</ul>
-</td></tr>
-</table>
-
-<p>Now, keeping in mind that the continuation structure
-remains constant across all Burro programs equivalent to <code>e</code>,
-we can show that control structures have inverses:</p>
-
-<table border=1 cellpadding=5>
-<tr><th>Instruction</th><th>Inverse</th><th>Test result</th><th>Concatenation</th><th>Net effect</th></tr>
-<tr><td align="center"><code><i>a</i>(<i>b</i>/<i>c</i>)<i>d</i></code></td><td align="center"><code><i>d'</i>{<i>b'</i>\<i>c'</i>}<i>a'</i></code></td>
-    <td align="center">zero</td><td align="center"><code><i>acdd'c'a'</i></code> &equiv; <code><i>acc'a'</i></code> &equiv; <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>a</i>(<i>b</i>/<i>c</i>)<i>d</i></code></td><td align="center"><code><i>d'</i>{<i>b'</i>\<i>c'</i>}<i>a'</i></code></td>
-    <td align="center">non-zero</td><td align="center"><code><i>abdd'b'a'</i></code> &equiv; <code><i>abb'a'</i></code> &equiv; <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
-</table>
-
-<p>There you have it: every Burro program has an inverse.</p>
-
-<h2>4. Implementations</h2>
-
-<p>There are two reference interpreters for Burro.  <code>burro.c</code> is
-written in ANSI C, and <code>burro.hs</code> is written in Haskell.
-Both are BSD licensed.
-Hopefully at least one of them is faithful to the execution model.</p>
-
-<h3><code>burro.c</code></h3>
-
-<p>The executable produced by compiling <code>burro.c</code> takes the
-following command-line arguments:</p>
-
-<ul><code>burro [-d] srcfile.bur</code></ul>
-
-<p>The named file is loaded as Burro source code.  All characters in this file except for
-<code>&gt;&lt;+-(/){\}e!</code> are ignored.</p>
-
-<p>Before starting the run, the interpreter will read a series of whitespace-separated
-integers from standard input.  These integers
-are placed on the tape initially, starting from the head-start position, extending right.
-All unspecified cells are considered to contain 0 initially.</p>
-
-<p>When the program has halted, all tape cells that were "touched" &mdash; either given initially as
-part of the input, or passed over by the tape head &mdash; are output to standard output.</p>
-
-<p>The meanings of the flags are as follows:</p>
-
-<ul>
-<li>The <code>-d</code> flag causes debugging information to be sent to standard error.</li>
-</ul>
-
-<p>The C implementation performs no syntax-checking.  It approximates the unbounded Burro tape
-with a tape of finite size (defined by <code>TAPE_SIZE</code>, by default 64K) with
-cells each capable of containing a C language <code>long</code>.</p>
-
-<h3><code>burro.hs</code></h3>
-
-<p>The Haskell version of the reference implementation is meant to be executed from
-within an interactive Haskell environment, such as Hugs.  As such, there is no
-command-line syntax; the user simply invokes the function <code>burro</code>,
-which has the signature <code>burro :: String -&gt; Tape -&gt; Tape</code>.
-A convenience constructor <code>tape :: [Integer] -> Tape</code> creates a tape
-from the given list of integers, with the head positioned over the leftmost cell.</p>
-
-<p>The Haskell implementation performs no syntax-checking. Because Haskell supports
-unbounded lists and arbitrary-precision integers, the Burro tape is modelled faithfully.</p>
-
-<h2>Discussion</h2>
-
-<p>I hadn't intended to come up with anything in particular when I started
-designing Burro.  I'm hardly a mathematician, and I didn't know anything
-about abstract algebra except that I found it intriguing.  I suppose that algebraic
-structures have some of the same appeal as programming languages, what with
-both dealing with primitive operators, equivalent expression forms, and so forth.</p>
-
-<p>I was basically struck by the variety of objects that could be shown to have
-this or that algebraic structure, and I wanted to see how well it would
-hold up if you tried to apply these structures to programs.</p>
-
-<p>Why groups?  Well, the original design goal for Burro was actually to create a Brainfuck-like language 
-where the set of possible programs forms the most <em>restricted</em>
-possible magma (i.e. the one with the most additional axioms) under concatenation.  It can
-readily been seen that the set of Brainfuck programs forms a semigroup,
-even a monoid, under concatenation (left as an exercise for the interested
-reader.)  At the other extreme, if the set of programs forms an abelian group under
-concatenation, the language probably isn't going to be very Brainfuck-like
-(since insisting that concatenation be commutative is tantamount to saying
-that the order of instructions in a program doesn't matter.)
-This leaves a group as the reasonable target to aim for, so that's what I
-aimed for.</p>
-
-<p>But the end result turns out to be related to <em>reversible computing</em>.
-This shouldn't have been a surprise, since groups are one of the simplest
-foundations for modelling symmetry; it should have been obvious to me that trying to
-make programs conform to them, would make them (semantically) symmetrical, and
-thus reversible.  But, it wasn't.</p>
-
-<p>We may ask: in what sense is Burro reversible?  And we may compare it
-to other esolangs in an attempt to understand.</p>
-
-<p>Well, it's not reversible in the sense that 
-<a href="http://esolangs.org/wiki/Befreak">Befreak</a> is reversible &mdash;
-you can't pause it at any point, change the direction of execution, and watch it
-"go backwards".  Specifically, you can't "undo" a loop in Burro by executing
-20 iterations, then turning around and "un-executing" those 20 iterations; instead,
-you "undo" the loop by neutralizing the toggling of the halt flag.  With this approach,
-inversion is instead <em>like the loop never existed in the first place</em>.</p>
-
-<p>If one did want to make a Brainfuck-like language which was reversible more in
-the sense that Befreak is reversible, one approach might be to add rules like
-"<code>+</code> acts like <code>-</code> if the program counter is incoming from
-the right". But, I haven't pondered on this approach much at all.</p>
-
-<p>Conversely, the concatenation concept doesn't have a clear
-correspondence in a two-dimensional language like Befreak &mdash; how do you put two programs
-next to each other?  Side-by-side, top-to-bottom?  You would probably need multiple
-operators, which would definately complicate things.</p>
-
-<p>It's also not reversible in the same way that
-<a href="http://esolangs.org/wiki/Kayak">Kayak</a> is reversible &mdash;
-Burro programs need not be palindromes, for instance.  In fact, I specifically made
-the "then" and "else" components of both <code>(/)</code> and <code>{\}</code>
-occur in the same order, so as to break the reflectional symmetry somewhat, and
-add some translational similarity.</p>
-
-<p>Conversely, Kayak doesn't cotton to concatenation too well either.
-In order to preserve the palindrome nature, concatenation would have to
-occur both at the beginning and the end simultaneously.
-I haven't given this idea much thought, and I'm not sure where it'd get you.</p>
-
-<p>Lastly, we could go outside the world of esolangs and use the
-definition of reversible computing given by Mike Frank<sup><a href="#2">2</a></sup>:</p>
-
-<blockquote>When we say reversible computing, we mean performing computation
-in such a way that any previous state of the computation can always be reconstructed
-given a description of the current state.</blockquote>
-
-<p>Burro appears to qualify by this definition &mdash; <em>almost</em>.  The requirement
-that we can reconstruct <em>any</em> previous state is a bit heavy.  We can definately
-reconstruct states up to the start of the last loop iteration, if we want to, due to the mechanism
-(continuations) that we've defined to remember what the program state was before any given
-conditional.</p>
-
-<p>But what about <em>before</em> the last loop iteration?  Each time we reach the end
-of the program text with halt flag unset, we repeat execution from the beginning, and
-when this happens, there might still be one or more continuations in storage that were the
-result of executing <code>(/)</code>'s that did not have
-matching <code>{\}</code>'s.</p>
-
-<p>We didn't say what happens to these "leftover" continuations.  In fact, computationally
-speaking, it doesn't matter: since syntactically no
-<code>{\}</code> can precede any <code>(/)</code>, those leftover continuations
-couldn't actually have any affect during the next iteration.  Any <code>{\}</code> that
-might consume them next time 'round must be preceded by a <code>(/)</code> which will
-produce one for it to consume instead.</p>
-
-<p>And indeed, discarding any continuation that remains when a Burro program loops
-means that continuations need occupy only a bounded amount of space during execution (because there
-is only a fixed number of conditionals in any given Burro program.)  This
-is a desirable thing in a practical implementation, and
-both the C and Haskell reference implementations do just this.</p>
-
-<p>But this is an implementation choice, and it would be equally valid to write an interpreter
-which retains all these leftover continuations.  And such an interpreter would qualify as a
-reversible computer under Mike Frank's definition, since these continuations would allow one
-to reconstruct the entire computation history of the program.</p>
-
-<p>On this last point, it's interesting to note the similarity between Burro's continuations
-and Kayak's bit bucket.  Although Burro continuations record the value tested, they really
-don't <em>need</em> to; they <em>could</em> just
-contain bits indicating whether the tests were successes or failures.  Both emptying
-the bit bucket, and discarding continuations, results in a destruction of information that
-prevents reversibility (and thermodynamically "generates heat") but allows for a limit on the amount of
-storage required.</p>
-
-<h2>History</h2>
-
-<p>I began formulating Burro in the summer of 2005.
-The basic design of Burro was finished by winter of 2005, as was the C implementation.
-But its release was delayed for several reasons.  Mainly, I was busy with other (ostensibly more
-important) things, like schoolwork.  However, I also had the nagging feeling that certain parts of
-the language were not quite described correctly.  These doubts led me to introduce the
-concept of a group over an equivalence relation, and to decide that Burro needed
-real syntax rules (lest inverting a Burro program was "too easy.")  So it wasn't until spring of 2007
-that I had a general description that I was satisfied with.
-I also wanted a better reference implementation, in something a bit more abstract and
-rigorous than C. So I wrote the Haskell version over the summer of 2007.</p>
-
-<p>In addition, part of me wanted to write a publishable paper on Burro.
-After all, group theory and reversible computing are valid and relatively mainstream
-research topics, so why not?  But in the end, considering doing this was really a
-waste of my time.  Densening my writing style to conform to acceptable academic
-standards of impermeability, and puffing up my "discovery" to acceptable academic
-standards of self-importance, really didn't appeal to me.  There's no sense pretending,
-in high-falutin' language, that Burro represents some profound advance in human
-knowledge.  It's just something neat that I built!  And in the end it seemed
-just as valuable, if not moreso, to try to turn esolangers on to group theory than
-to turn academics on to Brainfuck...</p>
-
-<p>Happy annihilating!</p>
-
-<p>-Chris Pressey
-<br>Cat's Eye Technologies
-<br>October 26, 2007
-<br>Windsor, Ontario, Canada</p>
-
-<h2>Footnotes</h2>
-
-<ul>
-<li><a name="1"><sup>1</sup>Dexter Kozen. <a href="http://www.cs.cornell.edu/~kozen/papers/ckat.ps">Kleene algebra with tests</a>. <i>Transactions on Programming Languages and
-Systems</i>, 19(3):427-443, May 1997.</a></li>
-<li><a name="2"><sup>2</sup>Michael Frank.  What's Reversible Computing? <code><a href="http://www.cise.ufl.edu/~mpf/rc/what.html">http://www.cise.ufl.edu/~mpf/rc/what.html</a></code></a></li>
-
-</ul>
-
-</body></html>
+<p>The 0 and 1 are represented by False and True boolean values in this
+semantics.</p>
+
+<pre><code> data State = State Tape Tape Bool
+     deriving (Show, Read, Eq)
+
+ newstate = State (tape [0]) (tape [0]) True
+</code></pre>
+
+<h2>Semantics of Burro Programs</h2>
+
+<p>Each instruction is defined as a function from program state to program
+state.  Concatenation of instructions is defined as composition of
+functions, like so:</p>
+
+<p>If ab is a Burro program, and a maps state S to state S', and b maps
+state S' to S'', then ab maps state S to state S''.</p>
+
+<pre><code> exec (Seq a b) t = exec b (exec a t)
+</code></pre>
+
+<p>The e instruction is the identity function on states.</p>
+
+<pre><code> exec Null s = s
+</code></pre>
+
+<p>The ! instruction toggles the halt flag.  If it is 0 in the input state, it
+is 1 in the output state, and vice versa.</p>
+
+<pre><code> exec ToggleHalt (State dat stack halt) = (State dat stack (not halt))
+</code></pre>
+
+<p>The + instruction increments the current data cell, while - decrements the
+current data cell.</p>
+
+<pre><code> exec Inc (State dat stack halt) = (State (inc dat) stack halt)
+ exec Dec (State dat stack halt) = (State (dec dat) stack halt)
+</code></pre>
+
+<p>The instruction &lt; makes the cell to the left of the current data cell, the
+new current data cell.  The instruction > makes the cell to the right of the
+current data cell, the new current data cell.</p>
+
+<pre><code> exec GoLeft (State dat stack halt) = (State (left dat) stack halt)
+ exec GoRight (State dat stack halt) = (State (right dat) stack halt)
+</code></pre>
+
+<p>(a/b) is the conditional construct, which is quite special.</p>
+
+<p>First, the current data cell is remembered for the duration of the execution
+of this construct &mdash; let's call it x.</p>
+
+<p>Second, the current data cell and the current stack cell are swapped.</p>
+
+<p>Third, the current stack cell is negated.</p>
+
+<p>Fourth, the stack cell to the right of the current stack cell is made
+the new current stack cell.</p>
+
+<p>Fifth, if x is positive, a is evaluated; if x is negative, b is evaluated;
+otherwise x = 0 and neither is evaluated.  Evaluation occurs in the state
+established by the preceding four steps.</p>
+
+<p>Sixth, the stack cell to the left of the current stack cell is made
+the new current stack cell.</p>
+
+<p>Seventh, the current data cell and the current stack cell are swapped again.</p>
+
+<pre><code> exec (Test thn els) (State dat stack halt) =
+     let
+         x = get dat
+         (dat', stack') = swap dat stack
+         stack'' = right (set stack' (0 - (get stack')))
+         f = if x &gt; 0 then thn else if x &lt; 0 then els else Null
+         (State dat''' stack''' halt') = exec f (State dat' stack'' halt)
+         (dat'''', stack'''') = swap dat''' (left stack''')
+     in
+         (State dat'''' stack'''' halt')
+</code></pre>
+
+<p>We observe an invariant here: because only the (a/b) construct affects the
+stack tape, and because it does so in a monotonic way &mdash; that is, both a
+and b inside (a/b) have access only to the portion of the stack tape to the
+right of what (a/b) has access to &mdash; the current stack cell in step seven
+always holds the same value as the current stack cell in step two, except
+negated.</p>
+
+<h2>Repetition</h2>
+
+<p>The repetition model of Burro 2.0 is identical to that of Burro 1.0.
+The program text is executed, resulting in a final state, S.  If, in
+S, the halt flag is 1, execution terminates with state S.  On the other
+hand, if the halt flag is 0, the program text is executed once more,
+this time on state S, and the whole procedure repeats.  Initially the
+halt flag is 1, so if ! is never executed, the program never repeats.</p>
+
+<p>Additionally, each time the program repeats, the stack tape is cleared.</p>
+
+<pre><code> run program state =
+     let
+         state'@(State dat' stack' halt') = exec program state
+     in
+         if
+             not halt'
+         then
+             run program (State dat' (tape [0]) True)
+         else
+             state'
+</code></pre>
+
+<h2>Central theorem of Burro</h2>
+
+<p>We now have established enough definitions to give a proof of the central
+theorem of Burro, which is:</p>
+
+<p><em>Theorem: The set of all Burro programs forms a group over computational
+equivalence under the operation of concatenation.</em></p>
+
+<p>As covered in the Burro 1.0 article, a "group over an equivalence relation"
+captures the notion of replacing the concept of equality in the group
+axioms with the concept of equivalency.  Our particular equivalence relation
+here is that two programs are equivalent if they compute the same function.</p>
+
+<p>In order to show that a set G is a group, it is sufficient to show the
+following four properties hold:</p>
+
+<ol>
+<li><p>Closure: For all a, b in G, ab is also in G.</p>
+
+<p>This follows from the inductive definition of Burro programs.</p></li>
+<li><p>Associativity: For all a, b and c in G, (ab)c ≡ a(bc).</p>
+
+<p>This follows from the definition of concatenation (sequential composition);
+it doesn't matter if we concatenate a with b first, then concatenate that
+with c, or if we concatenate b with c first, then concatenate a with that.
+Either way the result is the same string (or in this case, the same Burro
+program.)</p></li>
+<li><p>Identity element: There exists an element e in G, such that for every
+element a in G, ea ≡ ae ≡ a.</p>
+
+<p>The instruction e in Burro has no effect on the program state.  Therefore
+concatenating it to any existing program, or concatenating any existing
+program to it, results in a computationally equivalent program.</p></li>
+<li><p>Inverse element: For each a in G, there exists an element b in G such
+that ab ≡ ba ≡ e.</p>
+
+<p>This is the key property.  We first show that it holds for each element of
+the inductive definition of Burro programs.  We can then conclude, through
+structural induction, that all Burro programs have this property.</p>
+
+<ol>
+<li><p>Since e is the identity function on states, e is trivially its own
+inverse.</p></li>
+<li><p>Since toggling the flag twice is the same as not changing it at all,
+the inverse of ! is !.</p></li>
+<li><p>By the definitions of incrementation and decrementation, and because
+data cells cannot overflow, the inverse of + is -, and the inverse
+of - is +.</p></li>
+<li><p>By the definitions of left and right, and because the data tape is
+unbounded (never reaches an end,) the inverse of > is &lt;, and the inverse
+of &lt; is >.</p></li>
+<li><p>The inverse of ab is b'a' where b' is the inverse of b and a' is the
+inverse of a.  This is because abb'a' ≡ aea' ≡ aa' ≡ e.</p></li>
+<li><p>The inverse of (a/b) is (b'/a').  (This is the key case of the key
+property.)  Going back to the definition of (/), we see there are three
+sub-cases to consider.  Before execution of (a/b)(b'/a'), the data tape
+may be in one of three possible states:</p>
+
+<ol>
+<li><p>The current data cell is zero.  So in (a/b), x is 0, which goes on
+the stack and the current data cell becomes whatever was on the
+stack (call it k.)  The 0 on the stack is negated, thus stays 0
+(because 0 - 0 = 0).  The stack head is moved right.  Neither a nor
+b is evaluated.  The stack head is moved back left.  The stack and
+data cells are swapped again, so 0 is back in the current data cell
+and k is back in the current stack cell.  This is the same as the
+initial configuration, so (a/b) is equivalent to e.  By the same
+reasoning, (b'/a') is equivalent to e, and (a/b)(b'/a') ≡ ee ≡ e.</p></li>
+<li><p>The current data cell is positive (x > 0).  We first evaluate (a/b).
+The data and stack cells are swapped: the current data cell becomes
+k, and the current stack cell becomes x > 0.  The current stack cell
+is negated, so becomes -x &lt; 0.  The stack head is moved to the right.</p>
+
+<p>Because x > 0, the first of the sub-programs, a, is now evaluated.
+The current data cell could be anything &mdash; call it k'.</p>
+
+<p>The stack head is moved back to the left, so that the current stack
+cell is once again -x &lt; 0, and it is swapped with the current data
+cell, making it -x and making the current stack cell k'.</p>
+
+<p>We are now to evaluate (b'/a').  This time, we know the current data
+cell is negative (-x &lt; 0).  The data and stack cells are swapped:
+the current data cell becomes k', and the current stack cell becomes
+-x &lt; 0.  The current stack cell is negated, so becomes x > 0.  The
+stack head is moved to the right.</p>
+
+<p>Because -x &lt; 0, the second of the sub-programs, a', is now evaluated.
+Because a' is the inverse of a, and it is being applied to a state 
+that is the result of executing a, it will reverse this state to
+what it was before a was executed (inside (a/b).)  This means the
+current data cell will become k once more.</p>
+
+<p>The stack head is moved back to the left, so that the current stack
+cell is once again x > 0, and it is swapped with the current data
+cell, making it x and making the current stack cell k.  This is
+the state we started from, so (a/b)(b'/a') ≡ e.</p></li>
+<li><p>Case 3 is an exact mirror image of case 2 &mdash; the only difference
+is that the first time through, x &lt; 0 and b is evaluated, thus the
+second time through, -x > 0 and b' is evaluated.  Therefore
+(a/b)(b'/a') ≡ e in this instance as well.</p></li>
+</ol></li>
+</ol></li>
+</ol>
+
+<p>QED.</p>
+
+<h2>Driver and Unit Tests</h2>
+
+<p>We define a few more convenience functions to cater for the execution
+of Burro programs on an initial state.</p>
+
+<pre><code> interpret text = run (parse text) newstate
+
+ main = do
+     [fileName] &lt;- getArgs
+     burroText &lt;- readFile fileName
+     putStrLn $ show $ interpret burroText
+</code></pre>
+
+<p>Although we have proved that Burro programs form a group, it is not a
+mechanized proof, and only goes so far in helping us tell if the
+implementation (which, for an executable semantics, is one and the same
+as the formal semantic formulation) is correct.  Unit tests can't tell us
+definitively that there are no errors in the formulation, but they can
+help us catch a class of errors, if there is one present.</p>
+
+<p>For the first set of test cases, we give a set of pairs of Burro programs.
+In each of these pairs, both programs should be equivalent in the sense of
+evaluating to the same tape given an initial blank tape.</p>
+
+<p>For the second set, we simply give a list of Burro programs.  We test
+each one by applying the annihilationOf function to it and checking that
+the result of executing it on a blank tape is equivalent to e.</p>
+
+<pre><code> testCases = [
+               ("+++",            "-++-++-++"),
+               ("+(&gt;+++&lt;/---)",   "-&gt;+++&lt;"),
+               ("-(+++/&gt;---&lt;)",   "+&gt;---&lt;"),
+               ("(!/!)",          "e"),
+               ("+(--------!/e)", "+(/)+"),
+               ("+++(/)",         "---"),
+               ("---(/)",         "+++"),
+               ("+&gt; +++ --(--(--(/&gt;&gt;&gt;&gt;&gt;+)+/&gt;&gt;&gt;+)+/&gt;+)+",
+                "+&gt; &gt;&gt;&gt; +(---(/+)/)+")
+             ]
+
+ annihilationTests = [
+                        "e", "+", "-", "&lt;", "&gt;", "!",
+                        "++", "--", "&lt;+&lt;-", "--&gt;&gt;--",
+                        "(+/-)", "+(+/-)", "-(+/-)",
+                        "+(--------!/e)"
+                     ]
+
+ allTestCases = testCases ++ map nihil annihilationTests
+     where
+         nihil x = ((show (annihilationOf (parse x))), "e")
+</code></pre>
+
+<p>Our unit test harness evaluates to a list of tests which did
+not pass.  If all went well, it will evaluate to the empty list.</p>
+
+<pre><code> test [] =
+     []
+ test ((a, b):cases) =
+     let
+         resultA = interpret a
+         resultB = interpret b
+     in
+         if
+             resultA == resultB
+         then
+             test cases
+         else
+             ((a, b):(test cases))
+</code></pre>
+
+<p>Finally, some miscellaneous functions for helping analyze why the
+Burro tests you've written aren't working :)</p>
+
+<pre><code> debug (a, b) = ((a, interpret a), (b, interpret b))
+
+ debugTests = map debug (test allTestCases)
+</code></pre>
+
+<h2>Implementing a Turing Machine in Burro</h2>
+
+<p>First we note a Burro idiom.  Assume the current data cell (which
+we'll call C) contains an odd positive integer (which we'll call x.)
+We can test if x = 1, write a zero into C, write -x into the cell
+to the right of C, with the following construct:</p>
+
+<pre><code>--(F&gt;/T&gt;)&lt;
+</code></pre>
+
+<p>T if executed if x = 1 and F is executed otherwise.  (Remember,
+we're assuming x is odd and positive.)  To make the idiom hold, we
+also insist that T and F both leave the data tape head in the
+position they found it.  If you are wonderinf where the zero came
+from &mdash; it came from the stack.</p>
+
+<p>We now note that this idiom can be nested to detect larger odd
+numbers.  For example, to determine if x is 1 or 3 or 5:</p>
+
+<pre><code>--(--(--(F&gt;/T5&gt;)&lt;&gt;/T3&gt;)&lt;&gt;/T1&gt;)&lt;
+</code></pre>
+
+<p>We can of course optimize that a bit:</p>
+
+<pre><code>--(--(--(F&gt;/T5&gt;)/T3&gt;)/T1&gt;)&lt;
+</code></pre>
+
+<p>Our basic strategy is to encode the state of the Turing machine's finite
+control as a positive odd integer, which we will call a "finite control
+index."  We make sure to always keep the current finite control index
+available in the current data cell at the start of each loop, and we
+dispatch on its contents using the above idiom to simulate the finite
+control.  We may use odd integers to encode the symbols on the Turing
+Machine's tape as well.</p>
+
+<p>We map the Turing machine state onto the Burro data tape in an interleaved
+fashion, where three adjacent cells are used to represent one TM tape
+cell.  The first (leftmost) cell in the triple contains the finite control
+index described above.  The second cell is a "junk cell" where we can write
+stuff and never care about it again.  The third cell contains our
+representation of the contents of the TM tape cell.  Moving the TM tape
+head one cell is simulated by moving the Burro data tape head three cells,
+skipping over the interim finite control cell and junk cell.</p>
+
+<p>As we always want to be on an up-to-date finite control cell at the start
+of each iteration, we must make sure to copy it to the new tape cell triple
+each time we move the TM tape head to a new position.  If we are
+transitioning to a different TM state as well as moving the TM tape head,
+we can even just write in the new state at the new finite control cell.
+None of this copying requires intermediate loops, as these value are all
+fixed constants.  The only subtlety is that we must "erase" any finite
+control cell we move off of (set it back to zero) so that we can get it to
+the desired value by incrementation and decrementation only.  The idiom
+given above supplies that functionality for us.</p>
+
+<p>Note that the junk cell is used to store the end result of (/), which
+we don't care to predict, and don't care to use again.  Note also that
+the junk cell in which the value is stored belongs to the triple of the
+destination TM tape cell, the one to which the TM tape head is moving
+on this transition.</p>
+
+<p>A concrete example follows.  We consider the TM tape to be over an
+alphabet of two symbols, 1 and 3 (or in fact any odd integer greater
+than 1), and the finite control to have three states, denoted 1, 3,
+and 5.  In addition, state 7 (or in fact any odd integer greater than 5)
+is a halt state.</p>
+
+<p>In state 1, <br />
+- If the symbol is 1, enter state 3; <br />
+- If the symbol is 3, move head right one square, and remain in state 1.  </p>
+
+<pre><code>&gt;&gt;--(+++&gt;+&gt;/+&lt;&lt;+++&gt;)&lt;
+</code></pre>
+
+<p>In state 3, <br />
+- If the symbol is 1, write 3, move head left one square, and remain in
+  state 3; <br />
+- If the symbol is 3, move head right one square, and enter state 5.  </p>
+
+<pre><code>&gt;&gt;--(+++&gt;+++++&gt;/+++&lt;&lt;&lt;&lt;&lt;+++&gt;)&lt;
+</code></pre>
+
+<p>In state 5, <br />
+- If the symbol is 1, write 3, move head right one square, and remain in
+  state 5; <br />
+- If the symbol is 3, write 1 and enter state 7.  </p>
+
+<pre><code>&gt;&gt;--(+&lt;&lt;+++++++&gt;/+++&gt;+++++&gt;)&lt;
+</code></pre>
+
+<p>Putting it all together, including toggling the halt flag so that, unless
+we reach state 7 or higher, we loop through this sequence indefinitely:</p>
+
+<pre><code>!--(--(--(!&gt;/
+  &gt;&gt;--(+&lt;&lt;+++++++&gt;/+++&gt;+++++&gt;)&lt;
+&gt;)/
+  &gt;&gt;--(+++&gt;+++++&gt;/+++&lt;&lt;&lt;&lt;&lt;+++&gt;)&lt;
+&gt;)/
+  &gt;&gt;--(+++&gt;+&gt;/+&lt;&lt;+++&gt;)&lt;
+&gt;)&lt;
+</code></pre>
+
+<p>It is not a very interesting Turing machine, but by following this
+construction, it should be apparent how any arbitrary Turing machine
+could be mapped to a Burro program in the same way.</p>
+
+<p>Happy annihilating (for reals this time)!</p>
+
+<p>-Chris Pressey <br />
+Cat's Eye Technologies <br />
+June 7, 2010 <br />
+Evanston, Illinois, USA</p>
+</body>
+</html>

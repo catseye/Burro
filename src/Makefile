@@ -1,19 +1,20 @@
-# Makefile for burro.
+# Makefile for Burro.
 
-CC?=gcc
-OBJS=burro.o tree.o
-PROG=burro
+HC=ghc
+HCFLAGS=-O
+O=.o
+PROG=Burro
 
-all: $(PROG)
+OBJS=Burro${O}
 
-$(PROG): $(OBJS)
-	$(CC) $(OBJS) -o $(PROG)
+all: ${PROG}
 
-burro.o: burro.c tree.h
-	$(CC) -Wall -c burro.c -o burro.o
+Burro${O}: Burro.lhs
+	${HC} ${HCFLAGS} -c $*.lhs
 
-tree.o: tree.c tree.h
-	$(CC) -Wall -c tree.c -o tree.o
+${PROG}: ${OBJS}
+	${HC} -o ${PROG} -O ${OBJS}
+	strip ${PROG}
 
 clean:
-	rm -rf $(OBJS) $(PROG)
+	rm -rf *${O} *.hi ${PROG}
