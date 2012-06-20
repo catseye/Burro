@@ -1,4 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- encoding: UTF-8 -->
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -26,9 +27,9 @@ of concatenation, forms an algebraic group over a semantic equivalence relation.
 But the first version is close enough for jazz, and rolls off the tongue more easily...)</p>
 
 <p>Anyway, what does it mean?  It means that, among other things, every Burro program has
-an <em>antiprogram</em> &mdash; a series of instructions that can be appended to it
+an <em>antiprogram</em> — a series of instructions that can be appended to it
 to annihilate its behavior.  The resulting catenated program has the
-same semantics as no program at all &mdash; a "no-op," or a zero-length program.</p>
+same semantics as no program at all — a "no-op," or a zero-length program.</p>
 
 <p>Why is this at all remarkable?  Well, take the Brainfuck program fragment <code>[-]+[]</code>.
 What could you append to it to it to make it into a "no-op" program?
@@ -52,35 +53,35 @@ computation would probably be helpful.</p>
 
 <p>Recall (or go look up in an abstract algebra textbook) that a <em>group</em> is
 a pair of a set <var>S</var> and a binary operation
-&middot; : <var>S</var> &times; <var>S</var> &rarr; <var>S</var>
+· : <var>S</var> × <var>S</var> → <var>S</var>
 that obeys the following three axioms:</p>
 
 <ul>
 
 <li>For any three elements <var>a</var>, <var>b</var>, and <var>c</var> of
-the set <var>S</var>, (<var>a</var> &middot; <var>b</var>) &middot; <var>c</var> =
-<var>a</var> &middot; (<var>b</var> &middot; <var>c</var>).  In other words,
+the set <var>S</var>, (<var>a</var> · <var>b</var>) · <var>c</var> =
+<var>a</var> · (<var>b</var> · <var>c</var>).  In other words,
 the operation is "associative."  Parentheses don't matter, and we generally leave them out.</li>
 
 <li>There exists some element of <var>S</var>, which we call <b>e</b>, such that
-<var>a</var> &middot; <b>e</b> = <b>e</b> &middot; <var>a</var> = <var>a</var>
+<var>a</var> · <b>e</b> = <b>e</b> · <var>a</var> = <var>a</var>
 for every element <var>a</var> of <var>S</var>.  Think of
 <b>e</b> as a "neutral" element that just doesn't contribute anything.</li>
 
 <li>For every element <var>a</var> of <var>S</var> there is an element
-<var>a'</var> of <var>S</var> such that <var>a</var> &middot; <var>a'</var> = <b>e</b>.
+<var>a'</var> of <var>S</var> such that <var>a</var> · <var>a'</var> = <b>e</b>.
 That is, for any element, you can find some element that "annihilates" it.</li>
 
 </ul>
 
-<p>There are lots of examples of groups &mdash; the integers under the operation of
+<p>There are lots of examples of groups — the integers under the operation of
 addition, for example, where <b>e</b> is 0, and the annihilator for any integer
 is simply its negative (because <var>x</var> + (-<var>x</var>) always equals 0.)</p>
 
 <p>There are also lots of things you can prove are true about any group
 (that is, about groups in general.) For instance, that <b>e</b> is unique: if
-<var>a</var> &middot; <var>x</var> = <var>a</var> and
-<var>a</var> &middot; <var>y</var> = <var>a</var> then
+<var>a</var> · <var>x</var> = <var>a</var> and
+<var>a</var> · <var>y</var> = <var>a</var> then
 <var>x</var> = <var>y</var> = <b>e</b>.  (This particular property will
 become relevant very soon, so keep it in mind as you read the next section.)</p>
 
@@ -108,8 +109,8 @@ representations of it.</p>
 <p>This distinction becomes important with respect to treating programs
 as elements of a group, like we're doing in Burro.  Some program will
 be the neutral element <b>e</b>.  But either <em>many</em> programs will
-be equivalent to this program &mdash; in which case <b>e</b> is not unique, contrary to
-what group theory tells us &mdash; or we are talking about abstract programs
+be equivalent to this program — in which case <b>e</b> is not unique, contrary to
+what group theory tells us — or we are talking about abstract programs
 independent of any programming language, in which case our goal of defining a particular
 language called "Burro" for this purpose seems a bit futile.</p>
 
@@ -126,7 +127,7 @@ introducing a slight variation on the notion of a group.</p>
 <p>To this end, let's examine the idea of a <em>group over an equivalence relation</em>.
 All this is, really, is being specific about what constitutes "equals" in those
 group axioms I listed earlier.  In mathematics there is a well-established notion of
-an <em>equivalence relation</em> &mdash; a relationship between elements
+an <em>equivalence relation</em> — a relationship between elements
 which paritions a set into
 disjoint equivalence classes, where every element in a class is considered
 equivalent to every other element in that same class (and inequivalent to any
@@ -154,24 +155,24 @@ and with each class containing many individual elements which are treated
 interchangably with respect to the group axioms.</p>
 
 <p>I'll summarize the modified definition here.  A <em>group over an equivalence relation</em>
-is a triple &lang;<var>S</var>,&middot;,&equiv;&rang; where:</p>
+is a triple 〈<var>S</var>,·,≡〉 where:</p>
 <ul>
 <li><var>S</var> is a set</li>
-<li>&middot; : <var>S</var> &times; <var>S</var> &rarr; <var>S</var> is a binary operation over <var>S</var></li>
-<li>&equiv; is a reflexive, transitive, and symmetrical binary relation over <var>S</var></li>
+<li>· : <var>S</var> × <var>S</var> → <var>S</var> is a binary operation over <var>S</var></li>
+<li>≡ is a reflexive, transitive, and symmetrical binary relation over <var>S</var></li>
 </ul>
 <p>where the following axioms are also satisfied:</p>
 <ul>
-<li>&forall; <var>a</var>, <var>b</var>, <var>c</var> &isin; <var>S</var>: (<var>a</var> &middot; <var>b</var>) &middot; <var>c</var> &equiv;
-<var>a</var> &middot; (<var>b</var> &middot; <var>c</var>)</li>
-<li>&exist; <b>e</b> &isin; <var>S</var>: &forall; <var>a</var> &isin; <var>S</var>: <var>a</var> &middot; <b>e</b> &equiv; <b>e</b> &middot; <var>a</var> &equiv; <var>a</var></li>
-<li>&forall; <var>a</var> &isin; <var>S</var>: &exist; <var>a'</var> &isin; <var>S</var>: <var>a</var> &middot; <var>a'</var> &equiv; <b>e</b></li>
+<li>∀ <var>a</var>, <var>b</var>, <var>c</var> ∈ <var>S</var>: (<var>a</var> · <var>b</var>) · <var>c</var> ≡
+<var>a</var> · (<var>b</var> · <var>c</var>)</li>
+<li>∃ <b>e</b> ∈ <var>S</var>: ∀ <var>a</var> ∈ <var>S</var>: <var>a</var> · <b>e</b> ≡ <b>e</b> · <var>a</var> ≡ <var>a</var></li>
+<li>∀ <var>a</var> ∈ <var>S</var>: ∃ <var>a'</var> ∈ <var>S</var>: <var>a</var> · <var>a'</var> ≡ <b>e</b></li>
 </ul>
 
 <p>Every theorem that applies to groups should be easy to modify to be applicable
-to a group over an equivalence relation: just replace = with &equiv;.  So what
+to a group over an equivalence relation: just replace = with ≡.  So what
 we have, for example, is that while any given <b>e</b> itself might not be unique, the
-equivalence class <b>E</b> &sube; <var>S</var> that contains it is:
+equivalence class <b>E</b> ⊆ <var>S</var> that contains it is:
 <b>E</b> is the only equivalence class that contains
 elements like <b>e</b> and, for the purposes of the group, all of these elements are
 interchangeable.</p>
@@ -254,14 +255,14 @@ Also note that <i>bb'</i> is, by definition, <code>e</code>.)</p>
 <table border="1" cellpadding="5">
 <tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
 <tr><td align="center"><code><i>b</i>+</code></td><td align="center"><code>-<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>+-<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code><i>b</i>+-<i>b'</i></code> ≡ <code><i>b</i>e<i>b'</i></code> ≡ <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code><i>b</i>-</code></td><td align="center"><code>+<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>-+<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code><i>b</i>-+<i>b'</i></code> ≡ <code><i>b</i>e<i>b'</i></code> ≡ <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code><i>b</i>&gt;</code></td><td align="center"><code>&lt;<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>&gt;&lt;<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code><i>b</i>&gt;&lt;<i>b'</i></code> ≡ <code><i>b</i>e<i>b'</i></code> ≡ <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code><i>b</i>&lt;</code></td><td align="center"><code>&gt;<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>&lt;&gt;<i>b'</i></code> &equiv; <code><i>b</i>e<i>b'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code><i>b</i>e</code> &equiv; <code><i>b</i></code></td><td align="center"><code>e<i>b'</i></code> &equiv; <code><i>b'</i>e</code> &equiv; <code><i>b'</i></code></td>
+    <td align="center"><code><i>b</i>&lt;&gt;<i>b'</i></code> ≡ <code><i>b</i>e<i>b'</i></code> ≡ <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
+<tr><td align="center"><code><i>b</i>e</code> ≡ <code><i>b</i></code></td><td align="center"><code>e<i>b'</i></code> ≡ <code><i>b'</i>e</code> ≡ <code><i>b'</i></code></td>
     <td align="center"><code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 </table>
 
@@ -272,14 +273,14 @@ given instruction with any Burro program.</p>
 <table border="1" cellpadding="5">
 <tr><th>Instruction</th><th>Inverse</th><th>Concatenation</th><th>Net effect</th></tr>
 <tr><td align="center"><code>+<i>b</i></code></td><td align="center"><code><i>b'</i>-</code></td>
-    <td align="center"><code>+<i>bb'</i>-</code> &equiv; <code>+e-</code> &equiv; <code>+-</code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code>+<i>bb'</i>-</code> ≡ <code>+e-</code> ≡ <code>+-</code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code>-<i>b</i></code></td><td align="center"><code><i>b'</i>+</code></td>
-    <td align="center"><code>-<i>bb'</i>+</code> &equiv; <code>-e+</code> &equiv; <code>-+</code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code>-<i>bb'</i>+</code> ≡ <code>-e+</code> ≡ <code>-+</code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code>&gt;<i>b</i></code></td><td align="center"><code><i>b'</i>&lt;</code></td>
-    <td align="center"><code>&gt;<i>bb'</i>&lt;</code> &equiv; <code>&gt;e&lt;</code> &equiv; <code>&gt;&lt;</code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code>&gt;<i>bb'</i>&lt;</code> ≡ <code>&gt;e&lt;</code> ≡ <code>&gt;&lt;</code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code>&lt;<i>b</i></code></td><td align="center"><code><i>b'</i>&gt;</code></td>
-    <td align="center"><code>&lt;<i>bb'</i>&gt;</code> &equiv; <code>&lt;e&gt;</code> &equiv; <code>&lt;&gt;</code></td><td align="center"><code>e</code></td></tr>
-<tr><td align="center"><code>e<i>b</i></code> &equiv; <code><i>b</i></code></td><td align="center"><code><i>b'</i>e</code> &equiv; <code>e<i>b'</i></code> &equiv; <code><i>b'</i></code></td>
+    <td align="center"><code>&lt;<i>bb'</i>&gt;</code> ≡ <code>&lt;e&gt;</code> ≡ <code>&lt;&gt;</code></td><td align="center"><code>e</code></td></tr>
+<tr><td align="center"><code>e<i>b</i></code> ≡ <code><i>b</i></code></td><td align="center"><code><i>b'</i>e</code> ≡ <code>e<i>b'</i></code> ≡ <code><i>b'</i></code></td>
    <td align="center"><code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 </table>
 
@@ -294,14 +295,14 @@ seen, Brainfuck's is insufficient for our purposes, because it allows for
 the construction of infinite loops that we can't invert by concatenation.</p>
 
 <p>We could insist that all loops be finite, but that would make
-Burro less powerful than Brainfuck &mdash; it would only be capable of expressing
+Burro less powerful than Brainfuck — it would only be capable of expressing
 the primitive recursive functions.  The real challenge is in having Burro be Turing-complete,
 like Brainfuck.</p>
 
 <p>This situation looks dire, but there turns out to be a way.  What we
 do is borrow the trick used in languages like L00P and Version (and probably
 many others.)  We put a single, implicit loop around the whole program.
-(There is a classic formal proof that this is sufficient &mdash; the interested
+(There is a classic formal proof that this is sufficient — the interested
 reader is referred to the paper "Kleene algebra with tests"<sup><a href="#1">1</a></sup>,
 which gives a brief history, references, and its own proof.)</p>
 
@@ -327,9 +328,9 @@ doesn't change the fact that Burro programs form a group:</p>
 <tr><td align="center"><code>!</code></td><td align="center"><code>!</code></td>
     <td align="center"><code>!!</code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code>!<i>b</i></code></td><td align="center"><code><i>b'</i>!</code></td>
-    <td align="center"><code>!<i>bb'</i>!</code> &equiv; <code>!e!</code> &equiv; <code>!!</code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code>!<i>bb'</i>!</code> ≡ <code>!e!</code> ≡ <code>!!</code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code><i>b</i>!</code></td><td align="center"><code>!<i>b'</i></code></td>
-    <td align="center"><code><i>b</i>!!<i>b'</i></code> &equiv; <code><i>beb'</i></code> &equiv; <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center"><code><i>b</i>!!<i>b'</i></code> ≡ <code><i>beb'</i></code> ≡ <code><i>bb'</i></code></td><td align="center"><code>e</code></td></tr>
 </table>
 
 <p>Seems so.  Now we can write Burro programs that halt, and Burro programs that loop
@@ -380,7 +381,7 @@ antiprogram" thing.  If a Burro program with mismatched parentheses has the
 semantics of "no-op", then every Burro program has a trivial annihilator: just
 tack on an unmatching parenthesis.  Similarly, if malformed programs are
 considered to loop forever, how do you invert them?  So, for these reasons,
-Burro has some small amount of syntax &mdash; a bit more than Brainfuck is usually
+Burro has some small amount of syntax — a bit more than Brainfuck is usually
 considered to have, but not much.)</p>
 
 <p>Now, it turns out we will have to do a fair bit of work on <code>()</code> in order
@@ -388,7 +389,7 @@ to make it so that we can always find a bit of code that is the inverse of some 
 bit of code that includes <code>()</code>.</p>
 
 <p>We can't just make it a "plain old if", because by the time we've finished executing an "if",
-we don't know which branch was executed &mdash; so we have no idea what the "right"
+we don't know which branch was executed — so we have no idea what the "right"
 inverse of it would be.  For example,</p>
 
 <ul><li><code>(-/e)</code></li></ul>
@@ -398,7 +399,7 @@ was already 0 before the <code>(</code> was encountered, and nothing happened to
 inside the "if"... or is it because it was 1 before
 the <code>(</code> was encountered, and decremented to 0 by the <code>-</code>
 instruction inside the "if"?
-It could be either, and we don't know &mdash; so we can't find an inverse.</p>
+It could be either, and we don't know — so we can't find an inverse.</p>
 
 <p>We remedy this in a somewhat disappointingly uninteresting way: we make a copy of
 the value being tested and squirrel it away for future reference, so that pending code
@@ -409,7 +410,7 @@ invert it.</p>
 It's not a full-bodied continuation, as the term continuation is often used, in the
 sense of "function representing the entire remainder of the computation."
 But, it's a bit of context that is retained during execution that is intended to affect
-some future control flow decision &mdash; and that's the basic purpose of a continuation.
+some future control flow decision — and that's the basic purpose of a continuation.
 So, I will call it a continuation, although it is perhaps a diminished sort of continuation.
 (In this sense, the machine stack where arguments and
 return addresses are stored in a language like C is also a kind of continuation.)</p>
@@ -424,7 +425,7 @@ of a previous conditional, we "pop" a continuation from storage.</p>
 <p>To actually accomplish this latter action we need to define the control structure
 for undoing conditional tests.  We introduce the construct
 <code>{\}</code>, which works just like <code>(/)</code>, except that the value that it tests
-doesn't come from the tape &mdash; instead, it comes from the continuation.  We establish similar
+doesn't come from the tape — instead, it comes from the continuation.  We establish similar
 syntactic rules about matching every <code>{</code> with a <code>}</code> and an
 intervening <code>\</code>, in addition to a rule that says every <code>{\}</code>
 must be preceded by a <code>(/)</code>.</p>
@@ -435,7 +436,7 @@ must be preceded by a <code>(/)</code>.</p>
 
 <p>If the current cell contains 0 after <code>(-/e)</code>, the continuation will contain either
 a 1 or a 0 (the original contents of the cell.)  If the continuation contains a 0, the "else" part of
-<code>{+\e}</code> will be executed &mdash; i.e. nothing will happen.  On the other hand, if the
+<code>{+\e}</code> will be executed — i.e. nothing will happen.  On the other hand, if the
 continuation contains a 1, the "then" part of <code>{+\e}</code> will be executed.
 Either way, the tape is correctly restored to its original (pre-<code>(-/e)</code>) state.</p>
 
@@ -514,9 +515,9 @@ we can show that control structures have inverses:</p>
 <table border="1" cellpadding="5">
 <tr><th>Instruction</th><th>Inverse</th><th>Test result</th><th>Concatenation</th><th>Net effect</th></tr>
 <tr><td align="center"><code><i>a</i>(<i>b</i>/<i>c</i>)<i>d</i></code></td><td align="center"><code><i>d'</i>{<i>b'</i>\<i>c'</i>}<i>a'</i></code></td>
-    <td align="center">zero</td><td align="center"><code><i>acdd'c'a'</i></code> &equiv; <code><i>acc'a'</i></code> &equiv; <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center">zero</td><td align="center"><code><i>acdd'c'a'</i></code> ≡ <code><i>acc'a'</i></code> ≡ <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
 <tr><td align="center"><code><i>a</i>(<i>b</i>/<i>c</i>)<i>d</i></code></td><td align="center"><code><i>d'</i>{<i>b'</i>\<i>c'</i>}<i>a'</i></code></td>
-    <td align="center">non-zero</td><td align="center"><code><i>abdd'b'a'</i></code> &equiv; <code><i>abb'a'</i></code> &equiv; <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
+    <td align="center">non-zero</td><td align="center"><code><i>abdd'b'a'</i></code> ≡ <code><i>abb'a'</i></code> ≡ <code><i>aa'</i></code></td><td align="center"><code>e</code></td></tr>
 </table>
 
 <p>There you have it: every Burro program has an inverse.</p>
@@ -543,8 +544,8 @@ integers from standard input.  These integers
 are placed on the tape initially, starting from the head-start position, extending right.
 All unspecified cells are considered to contain 0 initially.</p>
 
-<p>When the program has halted, all tape cells that were "touched" &mdash; either given initially as
-part of the input, or passed over by the tape head &mdash; are output to standard output.</p>
+<p>When the program has halted, all tape cells that were "touched" — either given initially as
+part of the input, or passed over by the tape head — are output to standard output.</p>
 
 <p>The meanings of the flags are as follows:</p>
 
@@ -602,7 +603,7 @@ thus reversible.  But, it wasn't.</p>
 to other esolangs in an attempt to understand.</p>
 
 <p>Well, it's not reversible in the sense that 
-<a href="http://esolangs.org/wiki/Befreak">Befreak</a> is reversible &mdash;
+<a href="http://esolangs.org/wiki/Befreak">Befreak</a> is reversible —
 you can't pause it at any point, change the direction of execution, and watch it
 "go backwards".  Specifically, you can't "undo" a loop in Burro by executing
 20 iterations, then turning around and "un-executing" those 20 iterations; instead,
@@ -615,12 +616,12 @@ the sense that Befreak is reversible, one approach might be to add rules like
 the right". But, I haven't pondered on this approach much at all.</p>
 
 <p>Conversely, the concatenation concept doesn't have a clear
-correspondence in a two-dimensional language like Befreak &mdash; how do you put two programs
+correspondence in a two-dimensional language like Befreak — how do you put two programs
 next to each other?  Side-by-side, top-to-bottom?  You would probably need multiple
 operators, which would definately complicate things.</p>
 
 <p>It's also not reversible in the same way that
-<a href="http://esolangs.org/wiki/Kayak">Kayak</a> is reversible &mdash;
+<a href="http://esolangs.org/wiki/Kayak">Kayak</a> is reversible —
 Burro programs need not be palindromes, for instance.  In fact, I specifically made
 the "then" and "else" components of both <code>(/)</code> and <code>{\}</code>
 occur in the same order, so as to break the reflectional symmetry somewhat, and
@@ -638,7 +639,7 @@ definition of reversible computing given by Mike Frank<sup><a href="#2">2</a></s
 in such a way that any previous state of the computation can always be reconstructed
 given a description of the current state.</p></blockquote>
 
-<p>Burro appears to qualify by this definition &mdash; <em>almost</em>.  The requirement
+<p>Burro appears to qualify by this definition — <em>almost</em>.  The requirement
 that we can reconstruct <em>any</em> previous state is a bit heavy.  We can definately
 reconstruct states up to the start of the last loop iteration, if we want to, due to the mechanism
 (continuations) that we've defined to remember what the program state was before any given

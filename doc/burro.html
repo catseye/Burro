@@ -1,4 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- encoding: UTF-8 -->
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -17,7 +18,7 @@ June 2010, Chris Pressey, Cat's Eye Technologies</p>
 the operation of concatenation and over the equivalence relation of "computes
 the same function."  This means that, for every Burro program, we can
 construct a corresponding antiprogram that, when appended onto the first
-program, results in a "no-op" program (a program with no effect &mdash; the
+program, results in a "no-op" program (a program with no effect — the
 identity function.)</p>
 
 <p>(In fact, for every set of Burro programs that compute the same function,
@@ -325,7 +326,7 @@ current data cell, the new current data cell.</p>
 <p>(a/b) is the conditional construct, which is quite special.</p>
 
 <p>First, the current data cell is remembered for the duration of the execution
-of this construct &mdash; let's call it x.</p>
+of this construct — let's call it x.</p>
 
 <p>Second, the current data cell and the current stack cell are swapped.</p>
 
@@ -356,9 +357,9 @@ the new current stack cell.</p>
 </code></pre>
 
 <p>We observe an invariant here: because only the (a/b) construct affects the
-stack tape, and because it does so in a monotonic way &mdash; that is, both a
+stack tape, and because it does so in a monotonic way — that is, both a
 and b inside (a/b) have access only to the portion of the stack tape to the
-right of what (a/b) has access to &mdash; the current stack cell in step seven
+right of what (a/b) has access to — the current stack cell in step seven
 always holds the same value as the current stack cell in step two, except
 negated.</p>
 
@@ -459,7 +460,7 @@ k, and the current stack cell becomes x > 0.  The current stack cell
 is negated, so becomes -x &lt; 0.  The stack head is moved to the right.</p>
 
 <p>Because x > 0, the first of the sub-programs, a, is now evaluated.
-The current data cell could be anything &mdash; call it k'.</p>
+The current data cell could be anything — call it k'.</p>
 
 <p>The stack head is moved back to the left, so that the current stack
 cell is once again -x &lt; 0, and it is swapped with the current data
@@ -481,7 +482,7 @@ current data cell will become k once more.</p>
 cell is once again x > 0, and it is swapped with the current data
 cell, making it x and making the current stack cell k.  This is
 the state we started from, so (a/b)(b'/a') ≡ e.</p></li>
-<li><p>Case 3 is an exact mirror image of case 2 &mdash; the only difference
+<li><p>Case 3 is an exact mirror image of case 2 — the only difference
 is that the first time through, x &lt; 0 and b is evaluated, thus the
 second time through, -x > 0 and b' is evaluated.  Therefore
 (a/b)(b'/a') ≡ e in this instance as well.</p></li>
@@ -582,8 +583,8 @@ to the right of C, with the following construct:</p>
 <p>T if executed if x = 1 and F is executed otherwise.  (Remember,
 we're assuming x is odd and positive.)  To make the idiom hold, we
 also insist that T and F both leave the data tape head in the
-position they found it.  If you are wonderinf where the zero came
-from &mdash; it came from the stack.</p>
+position they found it.  If you are wondering where the zero came
+from — it came from the stack.</p>
 
 <p>We now note that this idiom can be nested to detect larger odd
 numbers.  For example, to determine if x is 1 or 3 or 5:</p>

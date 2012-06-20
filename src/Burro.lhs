@@ -13,7 +13,7 @@ Burro is a programming language whose programs form an algebraic group under
 the operation of concatenation and over the equivalence relation of "computes
 the same function."  This means that, for every Burro program, we can
 construct a corresponding antiprogram that, when appended onto the first
-program, results in a "no-op" program (a program with no effect -- the
+program, results in a "no-op" program (a program with no effect — the
 identity function.)
 
 (In fact, for every set of Burro programs that compute the same function,
@@ -316,7 +316,7 @@ current data cell, the new current data cell.
 (a/b) is the conditional construct, which is quite special.
 
 First, the current data cell is remembered for the duration of the execution
-of this construct -- let's call it x.
+of this construct — let's call it x.
 
 Second, the current data cell and the current stack cell are swapped.
 
@@ -346,9 +346,9 @@ Seventh, the current data cell and the current stack cell are swapped again.
 >         (State dat'''' stack'''' halt')
 
 We observe an invariant here: because only the (a/b) construct affects the
-stack tape, and because it does so in a monotonic way -- that is, both a
+stack tape, and because it does so in a monotonic way — that is, both a
 and b inside (a/b) have access only to the portion of the stack tape to the
-right of what (a/b) has access to -- the current stack cell in step seven
+right of what (a/b) has access to — the current stack cell in step seven
 always holds the same value as the current stack cell in step two, except
 negated.
 
@@ -458,7 +458,7 @@ following four properties hold:
          is negated, so becomes -x < 0.  The stack head is moved to the right.
 
          Because x > 0, the first of the sub-programs, a, is now evaluated.
-         The current data cell could be anything -- call it k'.
+         The current data cell could be anything — call it k'.
 
          The stack head is moved back to the left, so that the current stack
          cell is once again -x < 0, and it is swapped with the current data
@@ -481,7 +481,7 @@ following four properties hold:
          cell, making it x and making the current stack cell k.  This is
          the state we started from, so (a/b)(b'/a') ≡ e.
 
-      3. Case 3 is an exact mirror image of case 2 -- the only difference
+      3. Case 3 is an exact mirror image of case 2 — the only difference
          is that the first time through, x < 0 and b is evaluated, thus the
          second time through, -x > 0 and b' is evaluated.  Therefore
          (a/b)(b'/a') ≡ e in this instance as well.
@@ -578,8 +578,8 @@ to the right of C, with the following construct:
 T if executed if x = 1 and F is executed otherwise.  (Remember,
 we're assuming x is odd and positive.)  To make the idiom hold, we
 also insist that T and F both leave the data tape head in the
-position they found it.  If you are wonderinf where the zero came
-from -- it came from the stack.
+position they found it.  If you are wondering where the zero came
+from — it came from the stack.
 
 We now note that this idiom can be nested to detect larger odd
 numbers.  For example, to determine if x is 1 or 3 or 5:
