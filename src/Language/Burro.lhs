@@ -65,7 +65,7 @@ you are reading may have been converted to another format, such as HTML,
 for presentation.)  As such, this document serves as an "executable
 semantics", both defining the language and providing a ready tool.
 
-> module Main where
+> module Language.Burro where
 > import System.Environment
 
 

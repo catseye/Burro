@@ -10,7 +10,7 @@ if [ x`which ghc` = x  ]; then
     exit 0
 fi
 
-ghc --make src/Burro.lhs
+ghc --make src/Language/Burro.lhs
 
 # Burro${O}: Burro.lhs
 # 	${HC} ${HCFLAGS} -c $*.lhs
