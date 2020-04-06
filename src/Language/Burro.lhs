@@ -65,8 +65,8 @@ you are reading may have been converted to another format, such as HTML,
 for presentation.)  As such, this document serves as an "executable
 semantics", both defining the language and providing a ready tool.
 
-> module Language.Burro where
-> import System.Environment
+>     module Language.Burro where
+>     import System.Environment
 
 
 Inductive Definition of a Burro Program
@@ -82,15 +82,15 @@ If a and b are Burro programs, then (a/b) is a Burro program.
 If a and b are Burro programs, then ab is a Burro program.  
 Nothing else is a Burro program.  
 
-> data Burro = Null
->            | ToggleHalt
->            | Inc
->            | Dec
->            | GoLeft
->            | GoRight
->            | Test Burro Burro
->            | Seq Burro Burro
->     deriving (Read, Eq)
+>     data Burro = Null
+>                | ToggleHalt
+>                | Inc
+>                | Dec
+>                | GoLeft
+>                | GoRight
+>                | Test Burro Burro
+>                | Seq Burro Burro
+>         deriving (Read, Eq)
 
 
 Representation of Burro Programs
@@ -102,55 +102,55 @@ purposes of this semantics, we will use the ASCII character set.  Parsing
 a given string of symbols into a Burro program is straightforward; all
 symbols which are not Burro symbols are simply ignored.
 
-> instance Show Burro where
->     show Null = "e"
->     show ToggleHalt = "!"
->     show Inc = "+"
->     show Dec = "-"
->     show GoLeft = "<"
->     show GoRight = ">"
->     show (Test a b) = "(" ++ (show a) ++ "/" ++ (show b) ++ ")"
->     show (Seq a b) = (show a) ++ (show b)
+>     instance Show Burro where
+>         show Null = "e"
+>         show ToggleHalt = "!"
+>         show Inc = "+"
+>         show Dec = "-"
+>         show GoLeft = "<"
+>         show GoRight = ">"
+>         show (Test a b) = "(" ++ (show a) ++ "/" ++ (show b) ++ ")"
+>         show (Seq a b) = (show a) ++ (show b)
 > 
-> parse string =
+>     parse string =
+>             let
+>                 (rest, acc) = parseProgram string Null
+>             in
+>                 trim acc
+> 
+>     parseProgram [] acc =
+>         ([], acc)
+>     parseProgram ('e':rest) acc =
+>         parseProgram rest (Seq acc Null)
+>     parseProgram ('+':rest) acc =
+>         parseProgram rest (Seq acc Inc)
+>     parseProgram ('-':rest) acc =
+>         parseProgram rest (Seq acc Dec)
+>     parseProgram ('<':rest) acc =
+>         parseProgram rest (Seq acc GoLeft)
+>     parseProgram ('>':rest) acc =
+>         parseProgram rest (Seq acc GoRight)
+>     parseProgram ('!':rest) acc =
+>         parseProgram rest (Seq acc ToggleHalt)
+>     parseProgram ('(':rest) acc =
 >         let
->             (rest, acc) = parseProgram string Null
+>             (rest',  thenprog) = parseProgram rest Null
+>             (rest'', elseprog) = parseProgram rest' Null
+>             test = Test thenprog elseprog
 >         in
->             trim acc
+>             parseProgram rest'' (Seq acc test)
+>     parseProgram ('/':rest) acc =
+>         (rest, acc)
+>     parseProgram (')':rest) acc =
+>         (rest, acc)
+>     parseProgram (_:rest) acc =
+>         parseProgram rest acc
 > 
-> parseProgram [] acc =
->     ([], acc)
-> parseProgram ('e':rest) acc =
->     parseProgram rest (Seq acc Null)
-> parseProgram ('+':rest) acc =
->     parseProgram rest (Seq acc Inc)
-> parseProgram ('-':rest) acc =
->     parseProgram rest (Seq acc Dec)
-> parseProgram ('<':rest) acc =
->     parseProgram rest (Seq acc GoLeft)
-> parseProgram ('>':rest) acc =
->     parseProgram rest (Seq acc GoRight)
-> parseProgram ('!':rest) acc =
->     parseProgram rest (Seq acc ToggleHalt)
-> parseProgram ('(':rest) acc =
->     let
->         (rest',  thenprog) = parseProgram rest Null
->         (rest'', elseprog) = parseProgram rest' Null
->         test = Test thenprog elseprog
->     in
->         parseProgram rest'' (Seq acc test)
-> parseProgram ('/':rest) acc =
->     (rest, acc)
-> parseProgram (')':rest) acc =
->     (rest, acc)
-> parseProgram (_:rest) acc =
->     parseProgram rest acc
-> 
-> trim (Seq Null a) = trim a
-> trim (Seq a Null) = trim a
-> trim (Seq a b) = Seq (trim a) (trim b)
-> trim (Test a b) = Test (trim a) (trim b)
-> trim x = x
+>     trim (Seq Null a) = trim a
+>     trim (Seq a Null) = trim a
+>     trim (Seq a b) = Seq (trim a) (trim b)
+>     trim (Test a b) = Test (trim a) (trim b)
+>     trim x = x
 
 
 Group Properties of Burro Programs
@@ -168,19 +168,19 @@ The inverse of > is <: >< = e
 If aa' = e and bb' = e, (a/b)(b'/a') = e.  
 If aa' = e and bb' = e, abb'a' = e.  
 
-> inverse Null = Null
-> inverse ToggleHalt = ToggleHalt
-> inverse Inc = Dec
-> inverse Dec = Inc
-> inverse GoLeft = GoRight
-> inverse GoRight = GoLeft
-> inverse (Test a b) = Test (inverse b) (inverse a)
-> inverse (Seq a b) = Seq (inverse b) (inverse a)
+>     inverse Null = Null
+>     inverse ToggleHalt = ToggleHalt
+>     inverse Inc = Dec
+>     inverse Dec = Inc
+>     inverse GoLeft = GoRight
+>     inverse GoRight = GoLeft
+>     inverse (Test a b) = Test (inverse b) (inverse a)
+>     inverse (Seq a b) = Seq (inverse b) (inverse a)
 
 For every Burro program x, annihilationOf x is always equivalent
 computationally to e.
 
-> annihilationOf x = Seq x (inverse x)
+>     annihilationOf x = Seq x (inverse x)
 
 
 State Model for Burro Programs
@@ -200,15 +200,15 @@ everything to the left of the tape head (in the reverse order from how it
 appears on the tape.)  The second list contains everything to the right of
 the tape head, in the same order as it appears on the tape.
 
-> data Tape = Tape [Integer] [Integer]
->     deriving (Read)
+>     data Tape = Tape [Integer] [Integer]
+>         deriving (Read)
 > 
-> instance Show Tape where
->     show t@(Tape l r) =
->         let
->             (Tape l' r') = strip t
->         in
->             show (reverse l') ++ "<" ++ (show r')
+>     instance Show Tape where
+>         show t@(Tape l r) =
+>             let
+>                 (Tape l' r') = strip t
+>             in
+>                 show (reverse l') ++ "<" ++ (show r')
 
 When comparing two tapes for equality, we must disregard any zero cells
 farther to the left/right than the outermost non-zero cells.  Specifically,
@@ -218,65 +218,65 @@ strip out a zero that a tape head is currently over, however.
 Also, the current cell must be the same for both tapes (that is, tape heads
 must be in the same location) for two tapes to be considered equal.
 
-> stripzeroes list = (reverse (sz (reverse list)))
->     where sz []       = []
->           sz (0:rest) = sz rest
->           sz x        = x
+>     stripzeroes list = (reverse (sz (reverse list)))
+>         where sz []       = []
+>               sz (0:rest) = sz rest
+>               sz x        = x
 > 
-> ensurecell [] = [0]
-> ensurecell x  = x
+>     ensurecell [] = [0]
+>     ensurecell x  = x
 > 
-> strip (Tape l r) = Tape (ensurecell (stripzeroes l)) (stripzeroes r)
+>     strip (Tape l r) = Tape (ensurecell (stripzeroes l)) (stripzeroes r)
 > 
-> tapeeq :: Tape -> Tape -> Bool
-> tapeeq t1 t2 =
->     let
->         (Tape t1l t1r) = strip t1
->         (Tape t2l t2r) = strip t2
->     in
->         (t1l == t2l) && (t1r == t2r)
+>     tapeeq :: Tape -> Tape -> Bool
+>     tapeeq t1 t2 =
+>         let
+>             (Tape t1l t1r) = strip t1
+>             (Tape t2l t2r) = strip t2
+>         in
+>             (t1l == t2l) && (t1r == t2r)
 > 
-> instance Eq Tape where
->     t1 == t2 = tapeeq t1 t2
+>     instance Eq Tape where
+>         t1 == t2 = tapeeq t1 t2
 
 A convenience function for creating an inital tape is also provided.
 
-> tape :: [Integer] -> Tape
-> tape x = Tape [head x] (tail x)
+>     tape :: [Integer] -> Tape
+>     tape x = Tape [head x] (tail x)
 
 We now define some operations on tapes that we will use in the semantics.
 First, operations on tapes that alter or access the cell under the tape head.
 
-> inc (Tape (cell:left) right) = Tape (cell + 1 : left) right
-> dec (Tape (cell:left) right) = Tape (cell - 1 : left) right
-> get (Tape (cell:left) right) = cell
-> set (Tape (_:left) right) value = Tape (value : left) right
+>     inc (Tape (cell:left) right) = Tape (cell + 1 : left) right
+>     dec (Tape (cell:left) right) = Tape (cell - 1 : left) right
+>     get (Tape (cell:left) right) = cell
+>     set (Tape (_:left) right) value = Tape (value : left) right
 
 Next, operations on tapes that move the tape head.
 
-> left (Tape (cell:[]) right) = Tape [0] (cell:right)
-> left (Tape (cell:left) right) = Tape left (cell:right)
-> right (Tape left []) = Tape (0:left) []
-> right (Tape left (cell:right)) = Tape (cell:left) right
+>     left (Tape (cell:[]) right) = Tape [0] (cell:right)
+>     left (Tape (cell:left) right) = Tape left (cell:right)
+>     right (Tape left []) = Tape (0:left) []
+>     right (Tape left (cell:right)) = Tape (cell:left) right
 
 Finally, an operation on two tapes that swaps the current cell between
 them.
 
-> swap t1 t2 = (set t1 (get t2), set t2 (get t1))
+>     swap t1 t2 = (set t1 (get t2), set t2 (get t1))
 
 A program state consists of:
 
-- A "data tape";
-- A "stack tape"; and
-- A flag called the "halt flag", which may be 0 or 1.
+-    A "data tape";
+-    A "stack tape"; and
+-    A flag called the "halt flag", which may be 0 or 1.
 
 The 0 and 1 are represented by False and True boolean values in this
 semantics.
 
-> data State = State Tape Tape Bool
->     deriving (Show, Read, Eq)
+>     data State = State Tape Tape Bool
+>         deriving (Show, Read, Eq)
 > 
-> newstate = State (tape [0]) (tape [0]) True
+>     newstate = State (tape [0]) (tape [0]) True
 
 
 Semantics of Burro Programs
@@ -289,29 +289,29 @@ functions, like so:
 If ab is a Burro program, and a maps state S to state S', and b maps
 state S' to S'', then ab maps state S to state S''.
 
-> exec (Seq a b) t = exec b (exec a t)
+>     exec (Seq a b) t = exec b (exec a t)
 
 The e instruction is the identity function on states.
 
-> exec Null s = s
+>     exec Null s = s
 
 The ! instruction toggles the halt flag.  If it is 0 in the input state, it
 is 1 in the output state, and vice versa.
 
-> exec ToggleHalt (State dat stack halt) = (State dat stack (not halt))
+>     exec ToggleHalt (State dat stack halt) = (State dat stack (not halt))
 
 The + instruction increments the current data cell, while - decrements the
 current data cell.
 
-> exec Inc (State dat stack halt) = (State (inc dat) stack halt)
-> exec Dec (State dat stack halt) = (State (dec dat) stack halt)
+>     exec Inc (State dat stack halt) = (State (inc dat) stack halt)
+>     exec Dec (State dat stack halt) = (State (dec dat) stack halt)
 
 The instruction < makes the cell to the left of the current data cell, the
 new current data cell.  The instruction > makes the cell to the right of the
 current data cell, the new current data cell.
 
-> exec GoLeft (State dat stack halt) = (State (left dat) stack halt)
-> exec GoRight (State dat stack halt) = (State (right dat) stack halt)
+>     exec GoLeft (State dat stack halt) = (State (left dat) stack halt)
+>     exec GoRight (State dat stack halt) = (State (right dat) stack halt)
 
 (a/b) is the conditional construct, which is quite special.
 
@@ -334,16 +334,16 @@ the new current stack cell.
 
 Seventh, the current data cell and the current stack cell are swapped again.
 
-> exec (Test thn els) (State dat stack halt) =
->     let
->         x = get dat
->         (dat', stack') = swap dat stack
->         stack'' = right (set stack' (0 - (get stack')))
->         f = if x > 0 then thn else if x < 0 then els else Null
->         (State dat''' stack''' halt') = exec f (State dat' stack'' halt)
->         (dat'''', stack'''') = swap dat''' (left stack''')
->     in
->         (State dat'''' stack'''' halt')
+>     exec (Test thn els) (State dat stack halt) =
+>         let
+>             x = get dat
+>             (dat', stack') = swap dat stack
+>             stack'' = right (set stack' (0 - (get stack')))
+>             f = if x > 0 then thn else if x < 0 then els else Null
+>             (State dat''' stack''' halt') = exec f (State dat' stack'' halt)
+>             (dat'''', stack'''') = swap dat''' (left stack''')
+>         in
+>             (State dat'''' stack'''' halt')
 
 We observe an invariant here: because only the (a/b) construct affects the
 stack tape, and because it does so in a monotonic way — that is, both a
@@ -365,16 +365,16 @@ halt flag is 1, so if ! is never executed, the program never repeats.
 
 Additionally, each time the program repeats, the stack tape is cleared.
 
-> run program state =
->     let
->         state'@(State dat' stack' halt') = exec program state
->     in
->         if
->             not halt'
->         then
->             run program (State dat' (tape [0]) True)
->         else
->             state'
+>     run program state =
+>         let
+>             state'@(State dat' stack' halt') = exec program state
+>         in
+>             if
+>                 not halt'
+>             then
+>                 run program (State dat' (tape [0]) True)
+>             else
+>                 state'
 
 
 Central theorem of Burro
@@ -495,12 +495,12 @@ Driver and Unit Tests
 We define a few more convenience functions to cater for the execution
 of Burro programs on an initial state.
 
-> interpret text = run (parse text) newstate
+>     interpret text = run (parse text) newstate
 
-> main = do
->     [fileName] <- getArgs
->     burroText <- readFile fileName
->     putStrLn $ show $ interpret burroText
+>     main = do
+>         [fileName] <- getArgs
+>         burroText <- readFile fileName
+>         putStrLn $ show $ interpret burroText
 
 Although we have proved that Burro programs form a group, it is not a
 mechanized proof, and only goes so far in helping us tell if the
@@ -517,52 +517,52 @@ For the second set, we simply give a list of Burro programs.  We test
 each one by applying the annihilationOf function to it and checking that
 the result of executing it on a blank tape is equivalent to e.
 
-> testCases = [
->               ("+++",            "-++-++-++"),
->               ("+(>+++</---)",   "->+++<"),
->               ("-(+++/>---<)",   "+>---<"),
->               ("(!/!)",          "e"),
->               ("+(--------!/e)", "+(/)+"),
->               ("+++(/)",         "---"),
->               ("---(/)",         "+++"),
->               ("+> +++ --(--(--(/>>>>>+)+/>>>+)+/>+)+",
->                "+> >>> +(---(/+)/)+")
->             ]
+>     testCases = [
+>                   ("+++",            "-++-++-++"),
+>                   ("+(>+++</---)",   "->+++<"),
+>                   ("-(+++/>---<)",   "+>---<"),
+>                   ("(!/!)",          "e"),
+>                   ("+(--------!/e)", "+(/)+"),
+>                   ("+++(/)",         "---"),
+>                   ("---(/)",         "+++"),
+>                   ("+> +++ --(--(--(/>>>>>+)+/>>>+)+/>+)+",
+>                    "+> >>> +(---(/+)/)+")
+>                 ]
 
-> annihilationTests = [
->                        "e", "+", "-", "<", ">", "!",
->                        "++", "--", "<+<-", "-->>--",
->                        "(+/-)", "+(+/-)", "-(+/-)",
->                        "+(--------!/e)"
->                     ]
+>     annihilationTests = [
+>                            "e", "+", "-", "<", ">", "!",
+>                            "++", "--", "<+<-", "-->>--",
+>                            "(+/-)", "+(+/-)", "-(+/-)",
+>                            "+(--------!/e)"
+>                         ]
 
-> allTestCases = testCases ++ map nihil annihilationTests
->     where
->         nihil x = ((show (annihilationOf (parse x))), "e")
+>     allTestCases = testCases ++ map nihil annihilationTests
+>         where
+>             nihil x = ((show (annihilationOf (parse x))), "e")
 
 Our unit test harness evaluates to a list of tests which did
 not pass.  If all went well, it will evaluate to the empty list.
 
-> test [] =
->     []
-> test ((a, b):cases) =
->     let
->         resultA = interpret a
->         resultB = interpret b
->     in
->         if
->             resultA == resultB
->         then
->             test cases
->         else
->             ((a, b):(test cases))
+>     test [] =
+>         []
+>     test ((a, b):cases) =
+>         let
+>             resultA = interpret a
+>             resultB = interpret b
+>         in
+>             if
+>                 resultA == resultB
+>             then
+>                 test cases
+>             else
+>                 ((a, b):(test cases))
 
 Finally, some miscellaneous functions for helping analyze why the
 Burro tests you've written aren't working :)
 
-> debug (a, b) = ((a, interpret a), (b, interpret b))
+>     debug (a, b) = ((a, interpret a), (b, interpret b))
 
-> debugTests = map debug (test allTestCases)
+>     debugTests = map debug (test allTestCases)
 
 
 Implementing a Turing Machine in Burro
