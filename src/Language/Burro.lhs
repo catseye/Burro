@@ -497,11 +497,6 @@ of Burro programs on an initial state.
 
 >     interpret text = run (parse text) newstate
 
->     main = do
->         [fileName] <- getArgs
->         burroText <- readFile fileName
->         putStrLn $ show $ interpret burroText
-
 Although we have proved that Burro programs form a group, it is not a
 mechanized proof, and only goes so far in helping us tell if the
 implementation (which, for an executable semantics, is one and the same

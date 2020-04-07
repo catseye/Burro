@@ -1,3 +1,5 @@
 *.hi
 *.o
-Burro
+*.jsmod
+demo/burro.js
+bin/*.exe

@@ -1,20 +1,19 @@
 #!/bin/sh
 
-if [ x`which ghc` = x -a x`which runhugs` = x ]; then
-    echo "Neither ghc nor runhugs found on search path."
-    exit 1
+PROG=burro
+
+if command -v ghc >/dev/null 2>&1; then
+    echo "building $PROG.exe with ghc"
+    (cd src && ghc --make Main.hs -o ../bin/$PROG.exe)
+else
+    echo "ghc not found, not building $PROG.exe"
 fi
 
-if [ x`which ghc` = x  ]; then
-    echo "ghc not found on search path.  Use Hugs to run."
-    exit 0
+# For this to work, you need hastec installed.
+
+if command -v hastec_patience_my_pet >/dev/null 2>&1; then
+    echo "building $PROG.js with hastec"
+    (cd src && hastec --make HasteMain.hs -o ../demo/$PROG.js)
+else
+    echo "hastec not found, not building $PROG.js"
 fi
-
-ghc --make src/Language/Burro.lhs
-
-# Burro${O}: Burro.lhs
-# 	${HC} ${HCFLAGS} -c $*.lhs
-# 
-# ${PROG}: ${OBJS}
-# 	${HC} -o ${PROG} -O ${OBJS}
-# 	strip ${PROG}
