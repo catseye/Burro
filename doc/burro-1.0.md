@@ -7,8 +7,8 @@ October 2007, Chris Pressey, Cat's Eye Technologies.
 documentation on the latest version of the language, please see
 [Burro.lhs](../src/_Burro.lhs.html).*
 
-1. Introduction
----------------
+(1) Introduction
+----------------
 
 *Burro* is a Brainfuck-like programming language whose programs form an
 algebraic group under concatenation.
@@ -43,8 +43,8 @@ programming languages and reversible programming (even though it may not
 be immediatly clear exactly what that relationship is.) These are some
 of the factors that encouraged me to design Burro.
 
-2. Background
--------------
+(2) Background
+--------------
 
 Before explaining Burro, a short look of group theory and of the theory
 of computation would probably be helpful.
@@ -169,8 +169,8 @@ is: **E** is the only equivalence class that contains elements like
 **e** and, for the purposes of the group, all of these elements are
 interchangeable.
 
-3. Syntax and Semantics
------------------------
+(3) Syntax and Semantics
+------------------------
 
 ### Five-instruction Foundation
 
@@ -512,8 +512,8 @@ structures have inverses:
 
 There you have it: every Burro program has an inverse.
 
-4. Implementations
-------------------
+(4) Implementations
+-------------------
 
 There are two reference interpreters for Burro. `burro.c` is written in
 ANSI C, and `burro.hs` is written in Haskell. Both are BSD licensed.
