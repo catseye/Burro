@@ -217,13 +217,13 @@ Let's see. For every *single-instruction* Burro program, we can
 evidently find another Burro instruction that, when appended to it,
 "cancels it out" and makes a program with the same semantics as `e`:
 
-  Instruction   Inverse   Concatenation   Net effect
-  ------------- --------- --------------- ------------
-  `+`           `-`       `+-`            `e`
-  `-`           `+`       `-+`            `e`
-  `>`           `<`       `><`            `e`
-  `<`           `>`       `<>`            `e`
-  `e`           `e`       `ee`            `e`
+| Instruction   | Inverse   | Concatenation   | Net effect   |
+| ------------- | --------- | --------------- | ------------ |
+| `+`           | `-`       | `+-`            | `e`          |
+| `-`           | `+`       | `-+`            | `e`          |
+| `>`           | `<`       | `><`            | `e`          |
+| `<`           | `>`       | `<>`            | `e`          |
+| `e`           | `e`       | `ee`            | `e`          |
 
 Note that we once again should be more explicit about our requirements
 than Brainfuck. We need to have a tape which is infinite in both
@@ -239,26 +239,26 @@ program, concatenated with a given instruction? (In the following table,
 *b* indicates any Burro program, and *b'* its inverse. Also note that
 *bb'* is, by definition, `e`.)
 
-  Instruction   Inverse                Concatenation              Net effect
-  ------------- ---------------------- -------------------------- ------------
-  `b+`          `-b'`                  `b+-b'` ≡ `beb'` ≡ `bb'`   `e`
-  `b-`          `+b'`                  `b-+b'` ≡ `beb'` ≡ `bb'`   `e`
-  `b>`          `<b'`                  `b><b'` ≡ `beb'` ≡ `bb'`   `e`
-  `b<`          `>b'`                  `b<>b'` ≡ `beb'` ≡ `bb'`   `e`
-  `be` ≡ `b`    `eb'` ≡ `b'e` ≡ `b'`   `bb'`                      `e`
+| Instruction   | Inverse                | Concatenation              | Net effect
+| ------------- | ---------------------- | -------------------------- | ------------
+| `b+`          | `-b'`                  | `b+-b'` ≡ `beb'` ≡ `bb'`   | `e`
+| `b-`          | `+b'`                  | `b-+b'` ≡ `beb'` ≡ `bb'`   | `e`
+| `b>`          | `<b'`                  | `b><b'` ≡ `beb'` ≡ `bb'`   | `e`
+| `b<`          | `>b'`                  | `b<>b'` ≡ `beb'` ≡ `bb'`   | `e`
+| `be` ≡ `b`    | `eb'` ≡ `b'e` ≡ `b'`  | `bb'`                      | `e`
 
 Looks good. However, this isn't an abelian group, and concatenation is
 definately not commutative. So, to be complete, we need a table going in
 the other direction, too: concatenation of a given instruction with any
 Burro program.
 
-  Instruction   Inverse                Concatenation            Net effect
-  ------------- ---------------------- ------------------------ ------------
-  `+b`          `b'-`                  `+bb'-` ≡ `+e-` ≡ `+-`   `e`
-  `-b`          `b'+`                  `-bb'+` ≡ `-e+` ≡ `-+`   `e`
-  `>b`          `b'<`                  `>bb'<` ≡ `>e<` ≡ `><`   `e`
-  `<b`          `b'>`                  `<bb'>` ≡ `<e>` ≡ `<>`   `e`
-  `eb` ≡ `b`    `b'e` ≡ `eb'` ≡ `b'`   `bb'`                    `e`
+| Instruction   | Inverse                | Concatenation            | Net effect
+| ------------- | ---------------------- | ------------------------ | ------------
+| `+b`          | `b'-`                  | `+bb'-` ≡ `+e-` ≡ `+-`   | `e`
+| `-b`          | `b'+`                  | `-bb'+` ≡ `-e+` ≡ `-+`   | `e`
+| `>b`          | `b'<`                  | `>bb'<` ≡ `>e<` ≡ `><`   | `e`
+| `<b`          | `b'>`                  | `<bb'>` ≡ `<e>` ≡ `<>`   | `e`
+| `eb` ≡ `b`    | `b'e` ≡ `eb'` ≡ `b'`   | `bb'`                    | `e`
 
 So far, so good, I'd say. Now we can address to the problem of how to
 restrengthen the language so that it remains as powerful as Brainfuck.
@@ -293,18 +293,18 @@ reached, the flag is reset and the program repeats from the beginning.
 
 To manipulate this flag, we introduce a new instruction:
 
-  Instruction   Semantics
-  ------------- ------------------
-  `!`           Toggle halt flag
+| Instruction   | Semantics          |
+| ------------- | ------------------ |
+| `!`           | Toggle halt flag   |
 
 Then we check that adding this instruction to Burro's instruction set
 doesn't change the fact that Burro programs form a group:
 
-  Instruction   Inverse   Concatenation              Net effect
-  ------------- --------- -------------------------- ------------
-  `!`           `!`       `!!`                       `e`
-  `!b`          `b'!`     `!bb'!` ≡ `!e!` ≡ `!!`     `e`
-  `b!`          `!b'`     `b!!b'` ≡ `beb'` ≡ `bb'`   `e`
+| Instruction   | Inverse   | Concatenation              | Net effect
+| ------------- | --------- | -------------------------- | ------------
+| `!`           | `!`       | `!!`                       | `e`
+| `!b`          | `b'!`     | `!bb'!` ≡ `!e!` ≡ `!!`     | `e`
+| `b!`          | `!b'`     | `b!!b'` ≡ `beb'` ≡ `bb'`   | `e`
 
 Seems so. Now we can write Burro programs that halt, and Burro programs
 that loop forever. What we need next is for the program to be able to
