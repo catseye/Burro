@@ -7,8 +7,8 @@ October 2007, Chris Pressey, Cat's Eye Technologies.
 documentation on the latest version of the language, please see
 [Burro.lhs](../src/_Burro.lhs.html).*
 
-(1) Introduction
-----------------
+Introduction
+------------
 
 *Burro* is a Brainfuck-like programming language whose programs form an
 algebraic group under concatenation.
@@ -43,8 +43,8 @@ programming languages and reversible programming (even though it may not
 be immediatly clear exactly what that relationship is.) These are some
 of the factors that encouraged me to design Burro.
 
-(2) Background
---------------
+Background
+----------
 
 Before explaining Burro, a short look of group theory and of the theory
 of computation would probably be helpful.
@@ -169,8 +169,8 @@ is: **E** is the only equivalence class that contains elements like
 **e** and, for the purposes of the group, all of these elements are
 interchangeable.
 
-(3) Syntax and Semantics
-------------------------
+Syntax and Semantics
+--------------------
 
 ### Five-instruction Foundation
 
@@ -459,16 +459,11 @@ current tree node.
 
 #### Instruction: `(`
 
--   Create a new tree node with
-    the contents of the current
-    cell
--   Add that new node as a child
-    of the current node
--   Make that new node the new
-    current node
--   If the current cell is zero,
-    skip one instruction past the
-    matching `/`
+-   Create a new tree node with the contents of the current cell
+-   Add that new node as a child of the current node
+-   Make that new node the new current node
+-   If the current cell is zero, skip one instruction past the matching
+    `/`
 
 #### Instruction: `/`
 
@@ -476,18 +471,14 @@ current tree node.
 
 #### Instruction: `)`
 
--   Make the parent of the
-    current node the new current
-    node
+-   Make the parent of the current node the new current node
 
 #### Instruction: `{`
 
--   Make the most recently added
-    child of the current node the
-    new current node
--   If the value of the current
-    node is zero, skip one
-    instruction past the matching `\`
+-   Make the most recently added child of the current node the new current
+    node
+-   If the value of the current node is zero, skip one instruction past
+    the matching `\`
 
 #### Instruction: `\`
 
@@ -495,25 +486,22 @@ current tree node.
 
 #### Instruction: `}`
 
--   Make the parent of the
-    current node the new current
-    node
--   Remove the old current node
-    and all of its children
+-   Make the parent of the current node the new current node
+-   Remove the old current node and all of its children
 
 Now, keeping in mind that the continuation structure remains constant
 across all Burro programs equivalent to `e`, we can show that control
 structures have inverses:
 
-  Instruction   Inverse         Test result   Concatenation                    Net effect
-  ------------- --------------- ------------- -------------------------------- ------------
-  `a(b/c)d`     `d'{b'\c'}a'`   zero          `acdd'c'a'` ≡ `acc'a'` ≡ `aa'`   `e`
-  `a(b/c)d`     `d'{b'\c'}a'`   non-zero      `abdd'b'a'` ≡ `abb'a'` ≡ `aa'`   `e`
+| Instruction   | Inverse         | Test result   | Concatenation                    | Net effect   |
+| ------------- | --------------- | ------------- | -------------------------------- | ------------ |
+| `a(b/c)d`     | `d'{b'\c'}a'`   | zero          | `acdd'c'a'` ≡ `acc'a'` ≡ `aa'`   | `e`          |
+| `a(b/c)d`     | `d'{b'\c'}a'`   | non-zero      | `abdd'b'a'` ≡ `abb'a'` ≡ `aa'`   | `e`          |
 
 There you have it: every Burro program has an inverse.
 
-(4) Implementations
--------------------
+Implementations
+---------------
 
 There are two reference interpreters for Burro. `burro.c` is written in
 ANSI C, and `burro.hs` is written in Haskell. Both are BSD licensed.
@@ -524,7 +512,7 @@ Hopefully at least one of them is faithful to the execution model.
 The executable produced by compiling `burro.c` takes the following
 command-line arguments:
 
--   `burro [-d] srcfile.bur`
+    burro [-d] srcfile.bur
 
 The named file is loaded as Burro source code. All characters in this
 file except for `><+-(/){\}e!` are ignored.
