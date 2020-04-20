@@ -6,8 +6,7 @@ whose programs form a group under concatenation of their program texts.
 
 For the definition of the Burro language version 1.0, which was the
 first attempt to do this but does not actually succeed in forming a group,
-see the file `burro-1.0.html` in the `doc` directory.  (This should
-probably be converted to Markdown someday, but that day is not today.)
+see the file [`doc/burro-1.0.md`](doc/burro-1.0.md).
 
 For the definition of the Burro language version 2.0, which does indeed
 form a group, see the Literate Haskell file `Burro.lhs` in the `src`
