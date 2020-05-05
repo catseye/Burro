@@ -81,7 +81,7 @@ The symbol `+` is a Burro program.
 The symbol `-` is a Burro program.  
 The symbol `<` is a Burro program.  
 The symbol `>` is a Burro program.  
-If _a_ and _b_ are Burro programs, then `(`_a_`/`_b_)` is a Burro program.  
+If _a_ and _b_ are Burro programs, then `(`_a_`/`_b_`)` is a Burro program.  
 If _a_ and _b_ are Burro programs, then _ab_ is a Burro program.  
 Nothing else is a Burro program.  
 
@@ -632,32 +632,35 @@ In state 1,
 - If the symbol is 1, enter state 3;  
 - If the symbol is 3, move head right one square, and remain in state 1.  
 
-     >>--(+++>+>/+<<+++>)<
+     
+    >>--(+++>+>/+<<+++>)<
 
 In state 3,  
 - If the symbol is 1, write 3, move head left one square, and remain in
   state 3;  
 - If the symbol is 3, move head right one square, and enter state 5.  
 
-     >>--(+++>+++++>/+++<<<<<+++>)<
+     
+    >>--(+++>+++++>/+++<<<<<+++>)<
 
 In state 5,  
 - If the symbol is 1, write 3, move head right one square, and remain in
   state 5;  
 - If the symbol is 3, write 1 and enter state 7.  
 
-     >>--(+<<+++++++>/+++>+++++>)<
+     
+    >>--(+<<+++++++>/+++>+++++>)<
 
 Putting it all together, including toggling the halt flag so that, unless
 we reach state 7 or higher, we loop through this sequence indefinitely:
 
-     !--(--(--(!>/
-       >>--(+<<+++++++>/+++>+++++>)<
-     >)/
-       >>--(+++>+++++>/+++<<<<<+++>)<
-     >)/
-       >>--(+++>+>/+<<+++>)<
-     >)<
+    !--(--(--(!>/
+      >>--(+<<+++++++>/+++>+++++>)<
+    >)/
+      >>--(+++>+++++>/+++<<<<<+++>)<
+    >)/
+      >>--(+++>+>/+<<+++>)<
+    >)<
 
 It is not a very interesting Turing machine, but by following this
 construction, it should be apparent how any arbitrary Turing machine
