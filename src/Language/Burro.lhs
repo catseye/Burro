@@ -632,24 +632,21 @@ In state 1,
 - If the symbol is 1, enter state 3;  
 - If the symbol is 3, move head right one square, and remain in state 1.  
 
-     
-    >>--(+++>+>/+<<+++>)<
+    &gt;&gt;--(+++>+>/+<<+++>)<
 
 In state 3,  
 - If the symbol is 1, write 3, move head left one square, and remain in
   state 3;  
 - If the symbol is 3, move head right one square, and enter state 5.  
-
-     
-    >>--(+++>+++++>/+++<<<<<+++>)<
+ 
+    &gt;&gt;--(+++>+++++>/+++<<<<<+++>)<
 
 In state 5,  
 - If the symbol is 1, write 3, move head right one square, and remain in
   state 5;  
 - If the symbol is 3, write 1 and enter state 7.  
-
-     
-    >>--(+<<+++++++>/+++>+++++>)<
+ 
+    &gt;&gt;--(+<<+++++++>/+++>+++++>)<
 
 Putting it all together, including toggling the halt flag so that, unless
 we reach state 7 or higher, we loop through this sequence indefinitely:
