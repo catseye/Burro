@@ -571,7 +571,9 @@ we'll call C) contains an odd positive integer (which we'll call _x_.)
 We can test if _x_ = 1, write a zero into C, write -_x_ into the cell
 to the right of C, with the following construct:
 
+```
     --(F>/T>)<
+```
 
 T if executed if _x_ = 1 and F is executed otherwise.  (Remember,
 we're assuming _x_ is odd and positive.)  To make the idiom hold, we
@@ -582,11 +584,15 @@ from — it came from the stack.
 We now note that this idiom can be nested to detect larger odd
 numbers.  For example, to determine if _x_ is 1 or 3 or 5:
 
+```
     --(--(--(F>/T5>)<>/T3>)<>/T1>)<
+```
 
 We can of course optimize that a bit:
 
+```
     --(--(--(F>/T5>)/T3>)/T1>)<
+```
 
 Our basic strategy is to encode the state of the Turing machine's finite
 control as a positive odd integer, which we will call a "finite control
@@ -632,25 +638,32 @@ In state 1,
 - If the symbol is 1, enter state 3;  
 - If the symbol is 3, move head right one square, and remain in state 1.  
 
-    &gt;&gt;--(+++>+>/+<<+++>)<
+```
+    >>--(+++>+>/+<<+++>)<
+```
 
 In state 3,  
 - If the symbol is 1, write 3, move head left one square, and remain in
   state 3;  
 - If the symbol is 3, move head right one square, and enter state 5.  
- 
-    &gt;&gt;--(+++>+++++>/+++<<<<<+++>)<
+
+```
+    >>--(+++>+++++>/+++<<<<<+++>)<
+```
 
 In state 5,  
 - If the symbol is 1, write 3, move head right one square, and remain in
   state 5;  
 - If the symbol is 3, write 1 and enter state 7.  
- 
-    &gt;&gt;--(+<<+++++++>/+++>+++++>)<
+
+``` 
+    >>--(+<<+++++++>/+++>+++++>)<
+```
 
 Putting it all together, including toggling the halt flag so that, unless
 we reach state 7 or higher, we loop through this sequence indefinitely:
 
+```
     !--(--(--(!>/
       >>--(+<<+++++++>/+++>+++++>)<
     >)/
@@ -658,6 +671,7 @@ we reach state 7 or higher, we loop through this sequence indefinitely:
     >)/
       >>--(+++>+>/+<<+++>)<
     >)<
+```
 
 It is not a very interesting Turing machine, but by following this
 construction, it should be apparent how any arbitrary Turing machine
