@@ -28,11 +28,11 @@ the program itself that is being annihilated.
 
 This document describes version 2.0 of the Burro language, a reformulation
 which addresses several issues with Burro 1.0.  An update to the language was
-desired by the author after it was pointed out by Alex Smith that the set of
+desired by the author after it was pointed out by [ais523][] that the set of
 Burro version 1.0 programs do not, in fact, form a proper group (the inverse
-of (/) is {\}, but no inverse of {\} is defined; also, the implementations
+of `(/)` is `{\}`, but no inverse of `{\}` is defined; also, the implementations
 (at least) did not support moving the tape head left past the "start" of the
-tape, so <> was not a well-defined program.)
+tape, so `<>` was not a well-defined program.)
 
 Additionally in this document, we construct a Burro 2.0 program equivalent to
 a certain Turing machine.  While this Turing machine is not universal, the
@@ -41,14 +41,17 @@ arbitrary Turing machine to a Burro program, hopefully making uncontroversial
 the idea that Burro qualifies as universal.
 
 For further background information on the Burro project, you may also wish
-to read the [Burro 1.0 article](../doc/burro-1.0.html), with the understanding
-that the language description given there is obsolete.
+to read the [Burro 1.0 article][], with the understanding that the language
+description given there is obsolete.
+
+[ais523]: https://esolangs.org/wiki/Ais523
+[Burro 1.0 article]: ../../doc/burro-1.0.md
 
 
 Changes from Burro 1.0
 ----------------------
 
-The {\} construct does not appear in Burro 2.0.  Instead, the (/) construct
+The `{\}` construct does not appear in Burro 2.0.  Instead, the `(/)` construct
 serves as its own inverse.  The tree-like structure of decision continuations
 is not present in Burro 2.0 either.  Instead, decision information is kept on
 a second tape, called the "stack tape".
@@ -72,14 +75,14 @@ semantics", both defining the language and providing a ready tool.
 Inductive Definition of a Burro Program
 ---------------------------------------
 
-The symbol e is a Burro program.  
-The symbol ! is a Burro program.  
-The symbol + is a Burro program.  
-The symbol - is a Burro program.  
-The symbol < is a Burro program.  
-The symbol > is a Burro program.  
-If a and b are Burro programs, then (a/b) is a Burro program.  
-If a and b are Burro programs, then ab is a Burro program.  
+The symbol `e` is a Burro program.  
+The symbol `!` is a Burro program.  
+The symbol `+` is a Burro program.  
+The symbol `-` is a Burro program.  
+The symbol `<` is a Burro program.  
+The symbol `>` is a Burro program.  
+If _a_ and _b_ are Burro programs, then `(`_a_`/`_b_)` is a Burro program.  
+If _a_ and _b_ are Burro programs, then _ab_ is a Burro program.  
 Nothing else is a Burro program.  
 
 >     data Burro = Null
@@ -159,14 +162,14 @@ Group Properties of Burro Programs
 We assert these first, and when we describe the program semantics we will
 show that the semantics do not violate them.
 
-The inverse of e is e: ee = e  
-The inverse of ! is !: !! = e  
-The inverse of + is -: +- = e  
-The inverse of - is +: -+ = e  
-The inverse of < is >: <> = e  
-The inverse of > is <: >< = e  
-If aa' = e and bb' = e, (a/b)(b'/a') = e.  
-If aa' = e and bb' = e, abb'a' = e.  
+The inverse of `e` is `e`: `ee` = `e`  
+The inverse of `!` is `!`: `!!` = `e`  
+The inverse of `+` is `-`: `+-` = `e`  
+The inverse of `-` is `+`: `-+` = `e`  
+The inverse of `<` is `>`: `<>` = `e`  
+The inverse of `>` is `<`: `><` = `e`  
+If _aa'_ = `e` and _bb'_ = `e`, `(`_a_`/`_b_`)(`_b'_`/`_a'_`)` = `e`.  
+If _aa'_ = `e` and _bb'_ = `e`, _abb'a'_ = `e`.  
 
 >     inverse Null = Null
 >     inverse ToggleHalt = ToggleHalt
@@ -177,8 +180,8 @@ If aa' = e and bb' = e, abb'a' = e.
 >     inverse (Test a b) = Test (inverse b) (inverse a)
 >     inverse (Seq a b) = Seq (inverse b) (inverse a)
 
-For every Burro program x, annihilationOf x is always equivalent
-computationally to e.
+For every Burro program _x_, `annihilationOf` _x_ is always equivalent
+computationally to `e`.
 
 >     annihilationOf x = Seq x (inverse x)
 
@@ -286,37 +289,37 @@ Each instruction is defined as a function from program state to program
 state.  Concatenation of instructions is defined as composition of
 functions, like so:
 
-If ab is a Burro program, and a maps state S to state S', and b maps
-state S' to S'', then ab maps state S to state S''.
+If _ab_ is a Burro program, and _a_ maps state S to state S', and _b_ maps
+state S' to S'', then _ab_ maps state S to state S''.
 
 >     exec (Seq a b) t = exec b (exec a t)
 
-The e instruction is the identity function on states.
+The `e` instruction is the identity function on states.
 
 >     exec Null s = s
 
-The ! instruction toggles the halt flag.  If it is 0 in the input state, it
+The `!` instruction toggles the halt flag.  If it is 0 in the input state, it
 is 1 in the output state, and vice versa.
 
 >     exec ToggleHalt (State dat stack halt) = (State dat stack (not halt))
 
-The + instruction increments the current data cell, while - decrements the
+The `+` instruction increments the current data cell, while `-` decrements the
 current data cell.
 
 >     exec Inc (State dat stack halt) = (State (inc dat) stack halt)
 >     exec Dec (State dat stack halt) = (State (dec dat) stack halt)
 
-The instruction < makes the cell to the left of the current data cell, the
-new current data cell.  The instruction > makes the cell to the right of the
+The instruction `<` makes the cell to the left of the current data cell, the
+new current data cell.  The instruction `>` makes the cell to the right of the
 current data cell, the new current data cell.
 
 >     exec GoLeft (State dat stack halt) = (State (left dat) stack halt)
 >     exec GoRight (State dat stack halt) = (State (right dat) stack halt)
 
-(a/b) is the conditional construct, which is quite special.
+`(`a`/`b`)` is the conditional construct, which is quite special.
 
 First, the current data cell is remembered for the duration of the execution
-of this construct — let's call it x.
+of this construct — let's call it _x_.
 
 Second, the current data cell and the current stack cell are swapped.
 
@@ -325,8 +328,8 @@ Third, the current stack cell is negated.
 Fourth, the stack cell to the right of the current stack cell is made
 the new current stack cell.
 
-Fifth, if x is positive, a is evaluated; if x is negative, b is evaluated;
-otherwise x = 0 and neither is evaluated.  Evaluation occurs in the state
+Fifth, if _x_ is positive, a is evaluated; if _x_ is negative, b is evaluated;
+otherwise _x_ = 0 and neither is evaluated.  Evaluation occurs in the state
 established by the preceding four steps.
 
 Sixth, the stack cell to the left of the current stack cell is made
@@ -345,10 +348,10 @@ Seventh, the current data cell and the current stack cell are swapped again.
 >         in
 >             (State dat'''' stack'''' halt')
 
-We observe an invariant here: because only the (a/b) construct affects the
+We observe an invariant here: because only the `(`a`/`b`)` construct affects the
 stack tape, and because it does so in a monotonic way — that is, both a
-and b inside (a/b) have access only to the portion of the stack tape to the
-right of what (a/b) has access to — the current stack cell in step seven
+and b inside `(`a`/`b`)` have access only to the portion of the stack tape to the
+right of what `(`a`/`b`)` has access to — the current stack cell in step seven
 always holds the same value as the current stack cell in step two, except
 negated.
 
@@ -361,7 +364,7 @@ The program text is executed, resulting in a final state, S.  If, in
 S, the halt flag is 1, execution terminates with state S.  On the other
 hand, if the halt flag is 0, the program text is executed once more,
 this time on state S, and the whole procedure repeats.  Initially the
-halt flag is 1, so if ! is never executed, the program never repeats.
+halt flag is 1, so if `!` is never executed, the program never repeats.
 
 Additionally, each time the program repeats, the stack tape is cleared.
 
@@ -409,7 +412,7 @@ following four properties hold:
 3. Identity element: There exists an element e in G, such that for every
    element a in G, ea ≡ ae ≡ a.
 
-   The instruction e in Burro has no effect on the program state.  Therefore
+   The instruction `e` in Burro has no effect on the program state.  Therefore
    concatenating it to any existing program, or concatenating any existing
    program to it, results in a computationally equivalent program.
 
@@ -420,71 +423,71 @@ following four properties hold:
    the inductive definition of Burro programs.  We can then conclude, through
    structural induction, that all Burro programs have this property.
 
-   1. Since e is the identity function on states, e is trivially its own
+   1. Since `e` is the identity function on states, `e` is trivially its own
       inverse.
 
-   2. Since toggling the flag twice is the same as not changing it at all,
-      the inverse of ! is !.
+   2. Since toggling the halt flag twice is the same as not changing it at all,
+      the inverse of `!` is `!`.
 
    3. By the definitions of incrementation and decrementation, and because
-      data cells cannot overflow, the inverse of + is -, and the inverse
-      of - is +.
+      data cells cannot overflow, the inverse of `+` is `-`, and the inverse
+      of `-` is `+`.
 
    4. By the definitions of left and right, and because the data tape is
-      unbounded (never reaches an end,) the inverse of > is <, and the inverse
-      of < is >.
+      unbounded (never reaches an end,) the inverse of `>` is `<`, and the
+      inverse of `<` is `>`.
 
    5. The inverse of ab is b'a' where b' is the inverse of b and a' is the
       inverse of a.  This is because abb'a' ≡ aea' ≡ aa' ≡ e.
 
-   6. The inverse of (a/b) is (b'/a').  (This is the key case of the key
-      property.)  Going back to the definition of (/), we see there are three
-      sub-cases to consider.  Before execution of (a/b)(b'/a'), the data tape
-      may be in one of three possible states:
+   6. The inverse of `(`a`/`b`)` is `(`b'`/`a'`)`.  (This is the key case of
+      the key property.)  Going back to the definition of `(/)`, we see there
+      are three sub-cases to consider.  Before execution of `(`a`/`b`)(`b'`/`a'`)`,
+      the data tape may be in one of three possible states:
 
-      1. The current data cell is zero.  So in (a/b), x is 0, which goes on
-         the stack and the current data cell becomes whatever was on the
-         stack (call it k.)  The 0 on the stack is negated, thus stays 0
+      1. The current data cell is zero.  So in `(`a`/`b`)`, _x_ is 0, which
+         goes on the stack and the current data cell becomes whatever was on
+         the stack (call it _k_.)  The 0 on the stack is negated, thus stays 0
          (because 0 - 0 = 0).  The stack head is moved right.  Neither a nor
          b is evaluated.  The stack head is moved back left.  The stack and
          data cells are swapped again, so 0 is back in the current data cell
          and k is back in the current stack cell.  This is the same as the
-         initial configuration, so (a/b) is equivalent to e.  By the same
-         reasoning, (b'/a') is equivalent to e, and (a/b)(b'/a') ≡ ee ≡ e.
+         initial configuration, so `(`a`/`b`)` is equivalent to e.  By the same
+         reasoning, `(`b'`/`a'`)` ≡ e, and `(`a`/`b`)(`b'`/`a'`)` ≡ ee ≡ e.
 
-      2. The current data cell is positive (x > 0).  We first evaluate (a/b).
+      2. The current data cell is positive (_x_ > 0).  We first evaluate `(`a`/`b`)`.
          The data and stack cells are swapped: the current data cell becomes
-         k, and the current stack cell becomes x > 0.  The current stack cell
-         is negated, so becomes -x < 0.  The stack head is moved to the right.
+         _k_, and the current stack cell becomes _x_ > 0.  The current stack cell
+         is negated, so becomes -_x_ < 0.  The stack head is moved to the right.
 
-         Because x > 0, the first of the sub-programs, a, is now evaluated.
-         The current data cell could be anything — call it k'.
+         Because _x_ > 0, the first of the sub-programs, a, is now evaluated.
+         The current data cell could be anything — call it _k'_.
 
          The stack head is moved back to the left, so that the current stack
-         cell is once again -x < 0, and it is swapped with the current data
-         cell, making it -x and making the current stack cell k'.
+         cell is once again -_x_ < 0, and it is swapped with the current data
+         cell, making it -_x_ and making the current stack cell _k'_.
          
-         We are now to evaluate (b'/a').  This time, we know the current data
-         cell is negative (-x < 0).  The data and stack cells are swapped:
-         the current data cell becomes k', and the current stack cell becomes
-         -x < 0.  The current stack cell is negated, so becomes x > 0.  The
+         We are now to evaluate `(`b'`/`a'`)`.  This time, we know the current data
+         cell is negative (-_x_ < 0).  The data and stack cells are swapped:
+         the current data cell becomes _k'_, and the current stack cell becomes
+         -_x_ < 0.  The current stack cell is negated, so becomes _x_ > 0.  The
          stack head is moved to the right.
 
-         Because -x < 0, the second of the sub-programs, a', is now evaluated.
+         Because -_x_ < 0, the second of the sub-programs, a', is now evaluated.
          Because a' is the inverse of a, and it is being applied to a state 
          that is the result of executing a, it will reverse this state to
-         what it was before a was executed (inside (a/b).)  This means the
-         current data cell will become k once more.
+         what it was before a was executed (inside `(`a`/`b`)`.)  This means the
+         current data cell will become _k_ once more.
 
          The stack head is moved back to the left, so that the current stack
-         cell is once again x > 0, and it is swapped with the current data
-         cell, making it x and making the current stack cell k.  This is
-         the state we started from, so (a/b)(b'/a') ≡ e.
+         cell is once again _x_ > 0, and it is swapped with the current data
+         cell, making it _x_ and making the current stack cell _k_.  This is
+         the state we started from, so `(`a`/`b`)(`b'`/`a'`)` ≡ e.
 
       3. Case 3 is an exact mirror image of case 2 — the only difference
-         is that the first time through, x < 0 and b is evaluated, thus the
-         second time through, -x > 0 and b' is evaluated.  Therefore
-         (a/b)(b'/a') ≡ e in this instance as well.
+         is that the first time through, _x_ < 0 and b is evaluated, thus the
+         second time through, -_x_ > 0 and b' is evaluated.  Therefore
+         `(`a`/`b`)(`b'`/`a'`)` ≡ e in this instance as well.
 
 QED.
 
@@ -510,7 +513,7 @@ evaluating to the same tape given an initial blank tape.
 
 For the second set, we simply give a list of Burro programs.  We test
 each one by applying the annihilationOf function to it and checking that
-the result of executing it on a blank tape is equivalent to e.
+the result of executing it on a blank tape is equivalent to `e`.
 
 >     testCases = [
 >                   ("+++",            "-++-++-++"),
@@ -564,20 +567,20 @@ Implementing a Turing Machine in Burro
 --------------------------------------
 
 First we note a Burro idiom.  Assume the current data cell (which
-we'll call C) contains an odd positive integer (which we'll call x.)
-We can test if x = 1, write a zero into C, write -x into the cell
+we'll call C) contains an odd positive integer (which we'll call _x_.)
+We can test if _x_ = 1, write a zero into C, write -_x_ into the cell
 to the right of C, with the following construct:
 
     --(F>/T>)<
 
-T if executed if x = 1 and F is executed otherwise.  (Remember,
-we're assuming x is odd and positive.)  To make the idiom hold, we
+T if executed if _x_ = 1 and F is executed otherwise.  (Remember,
+we're assuming _x_ is odd and positive.)  To make the idiom hold, we
 also insist that T and F both leave the data tape head in the
 position they found it.  If you are wondering where the zero came
 from — it came from the stack.
 
 We now note that this idiom can be nested to detect larger odd
-numbers.  For example, to determine if x is 1 or 3 or 5:
+numbers.  For example, to determine if _x_ is 1 or 3 or 5:
 
     --(--(--(F>/T5>)<>/T3>)<>/T1>)<
 
@@ -613,7 +616,7 @@ control cell we move off of (set it back to zero) so that we can get it to
 the desired value by incrementation and decrementation only.  The idiom
 given above supplies that functionality for us.
 
-Note that the junk cell is used to store the end result of (/), which
+Note that the junk cell is used to store the end result of `(/)`, which
 we don't care to predict, and don't care to use again.  Note also that
 the junk cell in which the value is stored belongs to the triple of the
 destination TM tape cell, the one to which the TM tape head is moving
@@ -629,32 +632,32 @@ In state 1,
 - If the symbol is 1, enter state 3;  
 - If the symbol is 3, move head right one square, and remain in state 1.  
 
-    >>--(+++>+>/+<<+++>)<
+     >>--(+++>+>/+<<+++>)<
 
 In state 3,  
 - If the symbol is 1, write 3, move head left one square, and remain in
   state 3;  
 - If the symbol is 3, move head right one square, and enter state 5.  
 
-    >>--(+++>+++++>/+++<<<<<+++>)<
+     >>--(+++>+++++>/+++<<<<<+++>)<
 
 In state 5,  
 - If the symbol is 1, write 3, move head right one square, and remain in
   state 5;  
 - If the symbol is 3, write 1 and enter state 7.  
 
-    >>--(+<<+++++++>/+++>+++++>)<
+     >>--(+<<+++++++>/+++>+++++>)<
 
 Putting it all together, including toggling the halt flag so that, unless
 we reach state 7 or higher, we loop through this sequence indefinitely:
 
-    !--(--(--(!>/
-      >>--(+<<+++++++>/+++>+++++>)<
-    >)/
-      >>--(+++>+++++>/+++<<<<<+++>)<
-    >)/
-      >>--(+++>+>/+<<+++>)<
-    >)<
+     !--(--(--(!>/
+       >>--(+<<+++++++>/+++>+++++>)<
+     >)/
+       >>--(+++>+++++>/+++<<<<<+++>)<
+     >)/
+       >>--(+++>+>/+<<+++>)<
+     >)<
 
 It is not a very interesting Turing machine, but by following this
 construction, it should be apparent how any arbitrary Turing machine
