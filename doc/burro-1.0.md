@@ -5,7 +5,7 @@ October 2007, Chris Pressey, Cat's Eye Technologies.
 
 *Note: This document describes version 1.0 of the Burro language. For
 documentation on the latest version of the language, please see
-[Burro.lhs](../src/_Burro.lhs.html).*
+[`Burro.lhs`](../src/Language/).*
 
 Introduction
 ------------
