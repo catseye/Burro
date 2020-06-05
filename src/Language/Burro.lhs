@@ -512,7 +512,7 @@ In each of these pairs, both programs should be equivalent in the sense of
 evaluating to the same tape given an initial blank tape.
 
 For the second set, we simply give a list of Burro programs.  We test
-each one by applying the annihilationOf function to it and checking that
+each one by applying the `annihilationOf` function to it and checking that
 the result of executing it on a blank tape is equivalent to `e`.
 
 >     testCases = [
