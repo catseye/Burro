@@ -36,11 +36,11 @@ it induces an equivalence relation.  If, for Burro program texts _s_ and _t_,
 ⟦_s_⟧ = ⟦_t_⟧, we say _s_ ~ _t_.
 
 We can take the quotient of B by this equivalence relation
-to obtain the quotient semigroup B/~.  This is the set of all representable
-Burro programs.  And in fact B/~ is not only a semigroup, it is also a group.
+to obtain the quotient semigroup B/\~.  This is the set of all representable
+Burro programs.  And in fact B/\~ is not only a semigroup, it is also a group.
 
-Because B/~ is a group, for every program _a_ in B/~ there exists a
-unique program _b_ in B/~ such that _a_ * _b_ = e, where * is program composition
+Because B/\~ is a group, for every program _a_ in B/\~ there exists a
+unique program _b_ in B/\~ such that _a_ * _b_ = e, where * is program composition
 and e is the null program.
 
 From this we infer that for every program text _s_ in B there exists a program
