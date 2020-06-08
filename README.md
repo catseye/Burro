@@ -41,11 +41,9 @@ algebraic structure B/\~.  This is the set of all Burro programs representable
 by B, which is by definition the set of all Burro programs.
 
 However, in [`Burro.lhs`](src/Language/) we go on to show that B/\~ is not
-merely an algebraic structure, it is in fact a group.
-
-Because B/\~ is a group, for every program _a_ in B/\~ there exists a unique
-Burro program _b_ in B/\~ such that _a_ * _b_ = e, where * is program composition
-and e is the null program.
+merely an algebraic structure, it is in fact a group.  In particular, for every
+Burro program _a_ in B/\~ there exists a unique Burro program _b_ in B/\~
+such that _a_ * _b_ = e, where * is program composition and e is the null program.
 
 From this, working backwards through the homomorphism (so to speak), we can infer
 that, for every program text _s_ in B there exists a program text _t_ in B
