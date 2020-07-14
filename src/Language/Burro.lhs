@@ -2,9 +2,9 @@
 
 The Burro Programming Language
 ==============================
-Version 2.0
-June 2010, Chris Pressey, Cat's Eye Technologies
-
+Version 2.0  
+June 2010, Chris Pressey, Cat's Eye Technologies  
+Revised Summer 2020 (reformatted Markdown, renamed module, removed `main`)
 
 Introduction
 ------------
