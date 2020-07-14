@@ -69,7 +69,6 @@ for presentation.)  As such, this document serves as an "executable
 semantics", both defining the language and providing a ready tool.
 
 >     module Language.Burro where
->     import System.Environment
 
 
 Inductive Definition of a Burro Program
