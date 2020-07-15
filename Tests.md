@@ -1,3 +1,17 @@
+Burro Tests
+===========
+
+Here are some test cases, written in [Falderal][] format, that can serve
+as a check that an implementation of Burro is not grossly broken.
+
+The fact that this test suite was produced as a side-effect of a search
+for an extensible idiom for conditionals in Burro should be taken into
+account when evaluating its suitability for a particular purpose.
+
+In this document, "Burro" refers to Burro 2.x.
+
+[Falderal]: https://catseye.tc/node/Falderal
+
 Idiom for conditional execution
 -------------------------------
 
@@ -133,15 +147,51 @@ The complication is that the value changed.  But, at least the change is
 not because of the contents of L or R.  We always know what the value
 changed to.  In the case of testing against 1, it changed to 2 - _n_.
 
-But, once we've tested against 1, it's unlikely that we'll want to
+And in fact, because 2 - (2 - _n_) = _n_, we ought to be able to change it back,
+just by doing the same thing we just did, again.
+
+    -> Tests for functionality "Run Burro Program"
+
+Try it with 1:
+
+    | +
+    | --(
+    |     ++
+    | >/
+    |     ++++
+    | >)--(/)
+    = State [4,1]<[] [0]<[] True
+
+Try it with 3:
+
+    | +++
+    | --(
+    |     ++
+    | >/
+    |     ++++
+    | >)--(/)
+    = State [2,3]<[] [0]<[] True
+
+Try it with 5:
+
+    | +++++
+    | --(
+    |     ++
+    | >/
+    |     ++++
+    | >)--(/)
+    = State [2,5]<[] [0]<[] True
+
+As you can see, after the test, the contents of the current tape cell
+are the same as the value we originally tested against.
+
+But once we've tested a value against 1, it's unlikely that we'll want to
 do that again.  What about the case of testing against other numbers?
 Consider the following:
 
     ----(L>/R>)<
 
 Now, if _n_ is 3 or less, **R** is executed; if _n_ is 5 or more, **L** is executed.
-
-    -> Tests for functionality "Run Burro Program"
 
 Try it with 3:
 
@@ -150,8 +200,8 @@ Try it with 3:
     |     ++
     | >/
     |     ++++
-    | >)<
-    = State [4]<[1] [0]<[] True
+    | >)----(/)
+    = State [4,3]<[] [0]<[] True
 
 Try it with 5:
 
@@ -160,7 +210,8 @@ Try it with 5:
     |     ++
     | >/
     |     ++++
-    | >)<
-    = State [2]<[-1] [0]<[] True
+    | >)----(/)
+    = State [2,5]<[] [0]<[] True
 
-We see now that the work cell contains 4 - _n_.
+The next step will be chaining these conditionals together so that
+we can build a test that tests for multiple cases.
