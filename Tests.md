@@ -267,4 +267,110 @@ And we can restate the scenario like
 *   If value is 5 then _a_ then _a_′ _b_ then _b_′ _c_ is executed.
     *   _a_ _a_′ _b_ _b_′ _c_ = _c_, so in effect, only _c_ is executed.
 
-So the idiom works out (in theory: now I need to write some test cases here.)
+We must also remember that each successive happens one cell to the
+right of the previous test (the cell being tested is the work cell of
+the previous test).  So we may have to wrap the contents of the
+conditional with `<` and `>` one or more times, if we want all the
+conditionals to operate on the same cell.
+
+So it looks like the idiom works out.  Let's write out some test cases
+to check that it actually does.
+
+Again we say the value to be tested is either 1, 3, or 5, and say we want
+to write 9 if it's 1, write 13 if it's 3, or write 7 if it's 5.
+
+The first part of this will be:
+
+    (
+        +++++++++
+    >/
+    >)(/)
+
+The second part will be
+
+    --(
+        <
+        ---------
+        +++++++++++++
+        >
+    >/
+    >)--(/)
+
+The third part will be
+
+    ----(
+        <<
+        -------------
+        +++++++
+        >>
+    >/
+    >)----(/)
+
+Put it all together and try it with 1:
+
+    | +
+    | (
+    |     +++++++++
+    | >/
+    | >)(/)
+    | --(
+    |     <
+    |     ---------
+    |     +++++++++++++
+    |     >
+    | >/
+    | >)--(/)
+    | ----(
+    |     <<
+    |     -------------
+    |     +++++++
+    |     >>
+    | >/
+    | >)----(/)<<<
+    = State [9]<[0,0,1] [0]<[] True
+
+Try it with 3:
+
+    | +++
+    | (
+    |     +++++++++
+    | >/
+    | >)(/)
+    | --(
+    |     <
+    |     ---------
+    |     +++++++++++++
+    |     >
+    | >/
+    | >)--(/)
+    | ----(
+    |     <<
+    |     -------------
+    |     +++++++
+    |     >>
+    | >/
+    | >)----(/)<<<
+    = State [13]<[0,0,3] [0]<[] True
+
+Try it with 5:
+
+    | +++++
+    | (
+    |     +++++++++
+    | >/
+    | >)(/)
+    | --(
+    |     <
+    |     ---------
+    |     +++++++++++++
+    |     >
+    | >/
+    | >)--(/)
+    | ----(
+    |     <<
+    |     -------------
+    |     +++++++
+    |     >>
+    | >/
+    | >)----(/)<<<
+    = State [7]<[0,0,5] [0]<[] True
