@@ -216,9 +216,55 @@ Try it with 5:
 The next step will be combining these conditionals so that we can build a test
 that tests for multiple cases.
 
-We note that we only have conditionals for greater than and less then.
-We don't have a conditional test for equality.  We can work around that.
+We've already noted that the original value being tested against isn't available
+inside the conditional -- it's "hiding" on the stack during that period.
 
-We also note that we can't nest conditionals, because the original value
-is not available inside the conditional -- it's "hiding" on the stack
-during that period.  We can work around that too.
+This rules out being able to test multiple cases by nesting conditionals.
+So instead of nesting conditionals, we'll chain them one after another.
+
+But there are some implications for this, when it's combined with the fact
+that we don't have conditional tests for equality, only tests for greater than
+and less then.
+
+We'll revert to a more conventional syntax to try to devise how we can overcome
+those implications.
+
+Say the value to be tested is either 1, 3, or 5, and say we want to execute
+_a_ if it's 1, _b_ if it's 3, or _c_ if it's 5.  We could try to write our chain
+like this:
+
+    if value > 0:
+        A
+    endif
+    if value > 2:
+        B
+    endif
+    if value > 4:
+        C
+    endif
+
+The problem is that A, B, and C don't match up exactly to _a_, _b_, and _c_.
+Instead we have:
+
+*   If value is 1 then A is executed.
+*   If value is 3 then A is executed then B is executed.
+*   If value is 5 then A then B then C is executed.
+
+But we can overcome this by defining what A, B, and C are, in terms of
+_a_, _b_, and _c_, and code that **undoes** _a_, _b_, and _c_.  Using
+the notation _x_′ to mean code that undoes _x_, we can choose the following
+equations:
+
+*   A = _a_
+*   B = _a_′ _b_
+*   C = _b_′ _c_
+
+And we can restate the scenario like
+
+*   If value is 1 then _a_ is executed.
+*   If value is 3 then _a_ is executed then _a_′ _b_ is executed.
+    *   _a_ _a_′ _b_ = _b_, so in effect, only _b_ is executed.
+*   If value is 5 then _a_ then _a_′ _b_ then _b_′ _c_ is executed.
+    *   _a_ _a_′ _b_ _b_′ _c_ = _c_, so in effect, only _c_ is executed.
+
+So the idiom works out (in theory: now I need to write some test cases here.)
