@@ -1,7 +1,7 @@
 module Main where
 
 import System.Environment
-import Language.Burro
+import Language.Burro.Definition
 import qualified Language.Burro.Debugger as Debugger
 
 main = do

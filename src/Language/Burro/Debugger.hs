@@ -2,7 +2,7 @@ module Language.Burro.Debugger where
 
 import System.Environment
 
-import Language.Burro hiding (exec, run, interpret)
+import Language.Burro.Definition hiding (exec, run, interpret)
 
 
 dump :: Burro -> State -> IO ()

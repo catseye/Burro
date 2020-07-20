@@ -9,8 +9,9 @@ first attempt to do this but does not actually succeed in forming a group,
 see the file [`doc/burro-1.0.md`](doc/burro-1.0.md).
 
 For the definition of the Burro language version 2.0, which does indeed
-form a group, see the Literate Haskell file [`Burro.lhs`](src/Language/) in the
-`src/Language` directory.  This also serves as a reference implementation of
+form a group, see the Literate Haskell file
+[`Language/Burro/Definition.lhs`](src/Language/Burro/) in the
+`src` directory.  This also serves as a reference implementation of
 the language, and includes a sketch of a proof that Burro is Turing-complete.
 
 The sense in which Burro programs form a group
@@ -40,7 +41,8 @@ We can take the quotient of B by this equivalence relation to obtain the
 algebraic structure B/\~.  This is the set of all Burro programs representable
 by B, which is by definition the set of all Burro programs.
 
-However, in [`Burro.lhs`](src/Language/) we go on to show that B/\~ is not
+However, in [`Language/Burro/Definition.lhs`](src/Language/Burro/)
+we go on to show that B/\~ is not
 merely an algebraic structure, it is in fact a group.  In particular, for every
 Burro program _a_ in B/\~ there exists a unique Burro program _b_ in B/\~
 such that _a_ * _b_ = e, where * is program composition and e is the null program.

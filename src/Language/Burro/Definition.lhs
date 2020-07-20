@@ -68,7 +68,7 @@ you are reading may have been converted to another format, such as HTML,
 for presentation.)  As such, this document serves as an "executable
 semantics", both defining the language and providing a ready tool.
 
->     module Language.Burro where
+>     module Language.Burro.Definition where
 
 
 Inductive Definition of a Burro Program
