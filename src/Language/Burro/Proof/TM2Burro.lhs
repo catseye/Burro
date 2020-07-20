@@ -1,11 +1,15 @@
+-> encoding: UTF-8
+
 TM2Burro
 ========
 
-In this document, "Burro" refers to Burro 2.x.
+(In this document, "Burro" refers to Burro 2.x.)
 
 This is a Turing machine to Burro compiler, the intent of which is to show
 how that any Turing machine can be mechanically translated into a Burro
 program, establishing that Burro is Turing-complete.
+
+>     module Language.Burro.Proof.TM2Burro where
 
 Encoding
 --------
@@ -93,3 +97,52 @@ In pseudocode, our Burro program will look like this:
     elif state-index == halt-state
         set halt flag
     endif
+
+Translation
+-----------
+
+The Turing machine description should be supplied as a list of pairs: `(state-index, choices)`.
+The `choices` is a list of quadruples: `(if-read-this-symbol, write-this-symbol, move-this-direction,
+go-to-this-state-next)`.
+
+The states in the Turing machine description must start at 1, be given in ascending order with
+no gaps.  Similarly, each choices list must begin by testing for symbol 1, then 3, then 5, etc.,
+with no gaps and no omissions (every choices list must name every possible symbol.)
+
+>     type StateID = Integer
+>     type SymbolID = Integer
+>     type Choices = [(SymbolID, SymbolID, Integer, StateID)]
+>     type TMDesc = [(StateID, Choices)]
+
+Some helper functions.
+
+How many states are in this Turing machine?
+
+>     numStatesOf tmDesc = length tmDesc
+
+How many symbols are in this Turing machine?
+
+>     numSymbolsOf ((_, choices):rest) = length choices
+
+How many Burro cells are needed to contain a single simulated Turing machine cell?
+
+>     sizeOfTMCell tmDesc = 1 + (numStatesOf tmDesc) + 1 + (numSymbolsOf tmDesc)
+
+Emit _n_ copies of a Burro instruction.
+
+>     emitMany i 0 = ""
+>     emitMany i n = i ++ emitMany i (n-1)
+
+Write a symbol to the tape, assuming the current Burro tape cell contains 0.
+
+>     write n = emitMany "+" n
+
+Move to a new simulated Turing machine tape cell.  Either -1 for left one cell,
+or 1 for right one cell.
+
+This is complicated by the fact that the number of work cells depends on
+the number of states and the number of symbols.
+
+>     move (-1) tmDesc = emitMany "<" (sizeOfTMCell tmDesc)
+>     move 1 tmDesc = emitMany ">" (sizeOfTMCell tmDesc)
+>     move 0 tmDesc = ""
