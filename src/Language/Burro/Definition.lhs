@@ -561,120 +561,13 @@ Burro tests you've written aren't working :)
 
 >     debugTests = map debug (test allTestCases)
 
-
-Implementing a Turing Machine in Burro
---------------------------------------
-
-First we note a Burro idiom.  Assume the current data cell (which
-we'll call C) contains an odd positive integer (which we'll call _x_.)
-We can test if _x_ = 1, write a zero into C, write -_x_ into the cell
-to the right of C, with the following construct:
-
-```
-    --(F>/T>)<
-```
-
-T if executed if _x_ = 1 and F is executed otherwise.  (Remember,
-we're assuming _x_ is odd and positive.)  To make the idiom hold, we
-also insist that T and F both leave the data tape head in the
-position they found it.  If you are wondering where the zero came
-from — it came from the stack.
-
-We now note that this idiom can be nested to detect larger odd
-numbers.  For example, to determine if _x_ is 1 or 3 or 5:
-
-```
-    --(--(--(F>/T5>)<>/T3>)<>/T1>)<
-```
-
-We can of course optimize that a bit:
-
-```
-    --(--(--(F>/T5>)/T3>)/T1>)<
-```
-
-Our basic strategy is to encode the state of the Turing machine's finite
-control as a positive odd integer, which we will call a "finite control
-index."  We make sure to always keep the current finite control index
-available in the current data cell at the start of each loop, and we
-dispatch on its contents using the above idiom to simulate the finite
-control.  We may use odd integers to encode the symbols on the Turing
-Machine's tape as well.
-
-We map the Turing machine state onto the Burro data tape in an interleaved
-fashion, where three adjacent cells are used to represent one TM tape
-cell.  The first (leftmost) cell in the triple contains the finite control
-index described above.  The second cell is a "junk cell" where we can write
-stuff and never care about it again.  The third cell contains our
-representation of the contents of the TM tape cell.  Moving the TM tape
-head one cell is simulated by moving the Burro data tape head three cells,
-skipping over the interim finite control cell and junk cell.
-
-As we always want to be on an up-to-date finite control cell at the start
-of each iteration, we must make sure to copy it to the new tape cell triple
-each time we move the TM tape head to a new position.  If we are
-transitioning to a different TM state as well as moving the TM tape head,
-we can even just write in the new state at the new finite control cell.
-None of this copying requires intermediate loops, as these value are all
-fixed constants.  The only subtlety is that we must "erase" any finite
-control cell we move off of (set it back to zero) so that we can get it to
-the desired value by incrementation and decrementation only.  The idiom
-given above supplies that functionality for us.
-
-Note that the junk cell is used to store the end result of `(/)`, which
-we don't care to predict, and don't care to use again.  Note also that
-the junk cell in which the value is stored belongs to the triple of the
-destination TM tape cell, the one to which the TM tape head is moving
-on this transition.
-
-A concrete example follows.  We consider the TM tape to be over an
-alphabet of two symbols, 1 and 3 (or in fact any odd integer greater
-than 1), and the finite control to have three states, denoted 1, 3,
-and 5.  In addition, state 7 (or in fact any odd integer greater than 5)
-is a halt state.
-
-In state 1,  
-- If the symbol is 1, enter state 3;  
-- If the symbol is 3, move head right one square, and remain in state 1.  
-
-```
-    >>--(+++>+>/+<<+++>)<
-```
-
-In state 3,  
-- If the symbol is 1, write 3, move head left one square, and remain in
-  state 3;  
-- If the symbol is 3, move head right one square, and enter state 5.  
-
-```
-    >>--(+++>+++++>/+++<<<<<+++>)<
-```
-
-In state 5,  
-- If the symbol is 1, write 3, move head right one square, and remain in
-  state 5;  
-- If the symbol is 3, write 1 and enter state 7.  
-
-``` 
-    >>--(+<<+++++++>/+++>+++++>)<
-```
-
-Putting it all together, including toggling the halt flag so that, unless
-we reach state 7 or higher, we loop through this sequence indefinitely:
-
-```
-    !--(--(--(!>/
-      >>--(+<<+++++++>/+++>+++++>)<
-    >)/
-      >>--(+++>+++++>/+++<<<<<+++>)<
-    >)/
-      >>--(+++>+>/+<<+++>)<
-    >)<
-```
-
-It is not a very interesting Turing machine, but by following this
-construction, it should be apparent how any arbitrary Turing machine
-could be mapped to a Burro program in the same way.
+[Ed. note: historically, the Burro 2.0 source has included a proof
+of Turing-completeness of Burro here.  However, it has never been
+a correct proof.  Despite this, the author remains convinced that
+Burro 2.0 is in fact Turing-complete.  In 2020 there were some efforts
+to produce a new, correct proof, however, these efforts are ongoing.
+Until these efforts are complete, the incorrect proof has been
+removed from this document to avoid confusion and false claims.]
 
 Happy annihilating (for reals this time)!
 
