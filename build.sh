@@ -9,11 +9,9 @@ else
     echo "ghc not found, not building $PROG.exe"
 fi
 
-# For this to work, you need hastec installed.
-
 if command -v hastec >/dev/null 2>&1; then
     echo "building $PROG.js with hastec"
-    (cd src && hastec --make HasteMain.hs -o ../demo/$PROG.js)
+    (cd src && hastec --make HasteMain.hs -o $PROG.js && mv $PROG.js ../demo/$PROG.js)
 else
     echo "hastec not found, not building $PROG.js"
 fi
