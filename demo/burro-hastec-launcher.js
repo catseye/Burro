@@ -40,7 +40,7 @@ function launch(config) {
   var select = makeSelect(controlPanel, "example program:", examplePrograms, function(option) {
     document.getElementById('prog').value = option.contents;
   });
-  selectOptionByText(select, "hello.burro");
+  selectOptionByText(select, "rudiments.burro");
 }
 
 launch({ container: document.getElementById('installation') });
